@@ -1,0 +1,182 @@
+   1: body {
+   2:     font-family: 'Segoe UI', Arial, sans-serif;
+   3:     margin: 0;
+   4:     background: #f7f7f7;
+   5:     color: #222;
+   6: }
+   7: .header {
+   8:     display: flex;
+   9:     align-items: center;
+  10:     justify-content: space-between;
+  11:     background: #fff;
+  12:     padding: 16px 32px;
+  13:     box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  14:     position: sticky;
+  15:     top: 0;
+  16:     z-index: 100;
+  17: }
+  18: .logo img {
+  19:     height: 48px;
+  20: }
+  21: .search-bar {
+  22:     display: flex;
+  23:     align-items: center;
+  24:     background: #eee;
+  25:     border-radius: 24px;
+  26:     padding: 4px 12px;
+  27: }
+  28: .search-bar input {
+  29:     border: none;
+  30:     background: transparent;
+  31:     outline: none;
+  32:     padding: 8px;
+  33:     font-size: 16px;
+  34:     width: 220px;
+  35: }
+  36: .search-bar button {
+  37:     background: none;
+  38:     border: none;
+  39:     cursor: pointer;
+  40:     font-size: 18px;
+  41:     color: #888;
+  42: }
+  43: .services {
+  44:     margin: 32px auto 0 auto;
+  45:     max-width: 900px;
+  46:     background: #fff;
+  47:     border-radius: 16px;
+  48:     box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  49:     padding: 24px;
+  50: }
+  51: .services h2 {
+  52:     margin-bottom: 16px;
+  53:     font-size: 22px;
+  54:     color: #2a7ae4;
+  55: }
+  56: .service-grid {
+  57:     display: grid;
+  58:     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  59:     gap: 24px;
+  60: }
+  61: .service-item {
+  62:     display: flex;
+  63:     flex-direction: column;
+  64:     align-items: center;
+  65:     background: #f0f4fa;
+  66:     border-radius: 12px;
+  67:     padding: 24px 0;
+  68:     cursor: pointer;
+  69:     transition: box-shadow 0.2s;
+  70: }
+  71: .service-item:hover {
+  72:     box-shadow: 0 4px 16px rgba(42,122,228,0.08);
+  73: }
+  74: .service-item i {
+  75:     font-size: 32px;
+  76:     color: #2a7ae4;
+  77:     margin-bottom: 8px;
+  78: }
+  79: .service-item span {
+  80:     font-size: 16px;
+  81:     color: #222;
+  82: }
+  83: .clinics {
+  84:     margin: 32px auto;
+  85:     max-width: 900px;
+  86:     background: #fff;
+  87:     border-radius: 16px;
+  88:     box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  89:     padding: 24px;
+  90: }
+  91: .clinics h2 {
+  92:     margin-bottom: 16px;
+  93:     font-size: 22px;
+  94:     color: #2a7ae4;
+  95: }
+  96: #clinic-list {
+  97:     display: flex;
+  98:     flex-direction: column;
+  99:     gap: 18px;
+ 100: }
+ 101: .clinic-card {
+ 102:     display: flex;
+ 103:     align-items: flex-start;
+ 104:     background: #f0f4fa;
+ 105:     border-radius: 12px;
+ 106:     padding: 16px;
+ 107:     box-shadow: 0 2px 8px rgba(42,122,228,0.04);
+ 108: }
+ 109: .clinic-logo {
+ 110:     width: 48px;
+ 111:     height: 48px;
+ 112:     border-radius: 8px;
+ 113:     background: #fff;
+ 114:     margin-right: 16px;
+ 115:     display: flex;
+ 116:     align-items: center;
+ 117:     justify-content: center;
+ 118:     font-size: 28px;
+ 119:     color: #2a7ae4;
+ 120: }
+ 121: .clinic-info {
+ 122:     flex: 1;
+ 123: }
+ 124: .clinic-name {
+ 125:     font-size: 18px;
+ 126:     font-weight: 600;
+ 127:     margin-bottom: 4px;
+ 128: }
+ 129: .clinic-desc {
+ 130:     font-size: 15px;
+ 131:     color: #555;
+ 132: }
+ 133: .footer-nav {
+ 134:     position: fixed;
+ 135:     left: 0;
+ 136:     bottom: 0;
+ 137:     width: 100%;
+ 138:     background: #fff;
+ 139:     box-shadow: 0 -2px 8px rgba(0,0,0,0.04);
+ 140:     z-index: 100;
+ 141: }
+ 142: .footer-menu {
+ 143:     display: flex;
+ 144:     justify-content: space-around;
+ 145:     align-items: center;
+ 146:     padding: 8px 0;
+ 147: }
+ 148: .footer-item {
+ 149:     display: flex;
+ 150:     flex-direction: column;
+ 151:     align-items: center;
+ 152:     color: #2a7ae4;
+ 153:     font-size: 14px;
+ 154:     cursor: pointer;
+ 155: }
+ 156: .footer-item i {
+ 157:     font-size: 22px;
+ 158:     margin-bottom: 2px;
+ 159: }
+ 160: @media (min-width: 900px) {
+ 161:     /* On desktop, pin the sidebar to the left */
+ 162:     .footer-nav {
+ 163:         position: fixed; /* keep it beside content, not below */
+ 164:         width: 220px;
+ 165:         height: 100vh;
+ 166:         left: 0;
+ 167:         top: 0;
+ 168:         box-shadow: 2px 0 8px rgba(0,0,0,0.04);
+ 169:         display: flex;
+ 170:         flex-direction: column;
+ 171:         justify-content: flex-start;
+ 172:     }
+ 173:     .footer-menu {
+ 174:         flex-direction: column;
+ 175:         align-items: flex-start;
+ 176:         padding: 32px 0 0 24px;
+ 177:         gap: 32px;
+ 178:     }
+ 179:     body {
+ 180:         margin-left: 220px;
+ 181:     }
+ 182: }

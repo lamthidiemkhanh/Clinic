@@ -1,0 +1,182 @@
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    margin: 0;
+    background: #f7f7f7;
+    color: #222;
+}
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #fff;
+    padding: 16px 32px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+.logo img {
+    height: 48px;
+}
+.search-bar {
+    display: flex;
+    align-items: center;
+    background: #eee;
+    border-radius: 24px;
+    padding: 4px 12px;
+}
+.search-bar input {
+    border: none;
+    background: transparent;
+    outline: none;
+    padding: 8px;
+    font-size: 16px;
+    width: 220px;
+}
+.search-bar button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    color: #888;
+}
+.services {
+    margin: 32px auto 0 auto;
+    max-width: 900px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    padding: 24px;
+}
+.services h2 {
+    margin-bottom: 16px;
+    font-size: 22px;
+    color: #2a7ae4;
+}
+.service-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 24px;
+}
+.service-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #f0f4fa;
+    border-radius: 12px;
+    padding: 24px 0;
+    cursor: pointer;
+    transition: box-shadow 0.2s;
+}
+.service-item:hover {
+    box-shadow: 0 4px 16px rgba(42,122,228,0.08);
+}
+.service-item i {
+    font-size: 32px;
+    color: #2a7ae4;
+    margin-bottom: 8px;
+}
+.service-item span {
+    font-size: 16px;
+    color: #222;
+}
+.clinics {
+    margin: 32px auto;
+    max-width: 900px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    padding: 24px;
+}
+.clinics h2 {
+    margin-bottom: 16px;
+    font-size: 22px;
+    color: #2a7ae4;
+}
+#clinic-list {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+.clinic-card {
+    display: flex;
+    align-items: flex-start;
+    background: #f0f4fa;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(42,122,228,0.04);
+}
+.clinic-logo {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    background: #fff;
+    margin-right: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: #2a7ae4;
+}
+.clinic-info {
+    flex: 1;
+}
+.clinic-name {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+.clinic-desc {
+    font-size: 15px;
+    color: #555;
+}
+.footer-nav {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    background: #fff;
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.04);
+    z-index: 100;
+}
+.footer-menu {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 8px 0;
+}
+.footer-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #2a7ae4;
+    font-size: 14px;
+    cursor: pointer;
+}
+.footer-item i {
+    font-size: 22px;
+    margin-bottom: 2px;
+}
+@media (min-width: 900px) {
+    /* On desktop, pin the sidebar to the left */
+    .footer-nav {
+        position: fixed; /* keep it beside content, not below */
+        width: 220px;
+        height: 100vh;
+        left: 0;
+        top: 0;
+        box-shadow: 2px 0 8px rgba(0,0,0,0.04);
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+    }
+    .footer-menu {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 32px 0 0 24px;
+        gap: 32px;
+    }
+    body {
+        margin-left: 220px;
+    }
+}

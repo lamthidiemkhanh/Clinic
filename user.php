@@ -27,10 +27,10 @@ switch ($method) {
         }
         break;
 
-    case 'POST': // Thêm user
+    case 'POST': // Thêm user mới
         $data = json_decode(file_get_contents("php://input"), true);
-        $sql = "INSERT INTO user 
-                (name, birth_date, gender, phone, address, email, avatar, introduction, role_id, created_at, updated_at) 
+
+        $sql = "INSERT INTO user (name, birth_date, gender, phone, address, email, avatar, introduction, role_id, created_at, updated_at) 
                 VALUES (:name, :birth_date, :gender, :phone, :address, :email, :avatar, :introduction, :role_id, NOW(), NOW())";
         $stmt = $conn->prepare($sql);
         $stmt->execute([
@@ -40,11 +40,20 @@ switch ($method) {
             ':phone' => $data['phone'],
             ':address' => $data['address'],
             ':email' => $data['email'],
-            ':avatar' => $data['avatar'],
-            ':introduction' => $data['introduction'],
+            ':avatar' => $data['avatar'] ?? null,
+            ':introduction' => $data['introduction'] ?? null,
             ':role_id' => $data['role_id']
         ]);
-        echo json_encode(["message" => "Thêm user thành công"]);
+
+        $id = $conn->lastInsertId();
+        $stmt = $conn->prepare("
+            SELECT u.*, r.name AS role_name
+            FROM user u
+            JOIN role r ON u.role_id = r.id
+            WHERE u.id = ?
+        ");
+        $stmt->execute([$id]);
+        echo json_encode($stmt->fetch(PDO::FETCH_ASSOC));
         break;
 
     case 'PUT': // Cập nhật user
@@ -53,6 +62,7 @@ switch ($method) {
             echo json_encode(["error" => "Thiếu id"]);
             exit;
         }
+
         $data = json_decode(file_get_contents("php://input"), true);
         $sql = "UPDATE user SET 
                     name = :name,
@@ -74,22 +84,30 @@ switch ($method) {
             ':phone' => $data['phone'],
             ':address' => $data['address'],
             ':email' => $data['email'],
-            ':avatar' => $data['avatar'],
-            ':introduction' => $data['introduction'],
+            ':avatar' => $data['avatar'] ?? null,
+            ':introduction' => $data['introduction'] ?? null,
             ':role_id' => $data['role_id'],
             ':id' => $_GET['id']
         ]);
-        echo json_encode(["message" => "Cập nhật user thành công"]);
+
+        $stmt = $conn->prepare("
+            SELECT u.*, r.name AS role_name
+            FROM user u
+            JOIN role r ON u.role_id = r.id
+            WHERE u.id = ?
+        ");
+        $stmt->execute([$_GET['id']]);
+        echo json_encode($stmt->fetch(PDO::FETCH_ASSOC));
         break;
 
-    case 'DELETE': // Xóa mềm hoặc xóa cứng
+    case 'DELETE': // Xóa mềm hoặc cứng
         if (!isset($_GET['id'])) {
             http_response_code(400);
             echo json_encode(["error" => "Thiếu id"]);
             exit;
         }
 
-        if (isset($_GET['hard']) && $_GET['hard'] == 'true') {
+        if (isset($_GET['force']) && $_GET['force'] == 'true') {
             $sql = "DELETE FROM user WHERE id = :id";
             $stmt = $conn->prepare($sql);
             $stmt->execute([':id' => $_GET['id']]);

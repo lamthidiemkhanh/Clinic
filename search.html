@@ -3,11 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trang chủ khách hàng - Clinic</title>
+    <title>Tìm kiếm phòng khám</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body>
+    <style>
+        /* Optional: keep filters visible below header when scrolling */
+        @media (min-width: 900px) {
+          .filters.sticky { position: sticky; top: 70px; z-index: 50; }
+        }
+    </style>
+    <script>
+      // simple helper to propagate search submit via Enter on this page
+      document.addEventListener('DOMContentLoaded', function(){
+        var input = document.querySelector('.search-bar input');
+        var btn = document.querySelector('.search-bar button');
+        function submit(){ /* handled in main.js through applyFilters() */ }
+        if (input) input.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); submit(); }});
+        if (btn) btn.addEventListener('click', function(){ submit(); });
+      });
+    </script>
+  </head>
+<body id="clinic-search-page">
     <!-- Header -->
     <header class="header">
         <div class="logo">
@@ -15,25 +31,12 @@
         </div>
         <div class="search-bar">
             <input type="text" placeholder="Tìm kiếm dịch vụ, phòng khám...">
-            <button><i class="fas fa-search"></i></button>
+            <button title="Tìm"><i class="fas fa-search"></i></button>
         </div>
     </header>
 
-    <!-- Main Services Grid -->
-    <section class="services">
-        <h2>Dịch vụ chính</h2>
-        <div class="service-grid">
-            <div class="service-item"><i class="fas fa-spa"></i><span>Spa & Grooming</span></div>
-            <div class="service-item"><i class="fas fa-stethoscope"></i><span>Khám bệnh</span></div>
-            <div class="service-item"><i class="fas fa-syringe"></i><span>Tiêm phòng</span></div>
-            <div class="service-item"><i class="fas fa-hotel"></i><span>Khách sạn</span></div>
-            <div class="service-item"><i class="fas fa-scalpel"></i><span>Phẫu thuật</span></div>
-            <div class="service-item"><i class="fas fa-ellipsis-h"></i><span>Khác</span></div>
-        </div>
-    </section>
-
-    <!-- Filters for search page -->
-    <section class="filters">
+    <!-- Filters (dịch vụ, thú cưng) -->
+    <section class="filters sticky">
         <div class="chip-group" aria-label="Loại dịch vụ">
             <button class="chip active" data-service="all">Tất cả</button>
             <button class="chip" data-service="kham-benh">Khám bệnh</button>
@@ -49,15 +52,13 @@
         </div>
     </section>
 
-    <!-- Nearby Clinics List -->
+    <!-- Results -->
     <section class="clinics">
-        <h2>Phòng khám và dịch vụ gần bạn</h2>
-        <div id="clinic-list">
-            <!-- Danh sách phòng khám sẽ được render bằng JS -->
-        </div>
+        <h2>Kết quả tìm kiếm</h2>
+        <div id="clinic-list"></div>
     </section>
 
-    <!-- Footer Navigation -->
+    <!-- Sidebar / Footer -->
     <footer class="footer-nav">
         <div class="footer-menu">
             <div class="footer-item"><i class="fas fa-home"></i><span>Trang chủ</span></div>
@@ -70,3 +71,4 @@
     <script src="main.js"></script>
 </body>
 </html>
+

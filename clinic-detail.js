@@ -16,14 +16,25 @@
     return res.json();
   }
 
+  let CLINIC_DATA = null;
+
   function renderClinic(c){
+    CLINIC_DATA = c || {};
     $('#clinic-name').textContent = c.name || 'Phòng khám';
     $('#clinic-address').textContent = c.address || c.description || '';
     $('#clinic-rating').textContent = (c.rating ?? c.score ?? '—').toString();
     if (String(c.is_verify) === '1' || String(c.is_verify).toLowerCase() === 'true') {
       $('#clinic-verified').style.display = '';
     }
-    if (c.logo) $('#clinic-hero-img').src = c.logo;
+    var logo = c.logo || c.image || c.image_url || c.avatar || c.photo || '';
+    if (logo) {
+      $('#clinic-hero-img').src = logo;
+      const top = document.getElementById('top-logo');
+      if (top) top.src = logo;
+    } else {
+      const top = document.getElementById('top-logo');
+      if (top) top.src = 'logo.png';
+    }
   }
 
   function groupBy(arr, key){
@@ -48,9 +59,27 @@
         const name = $el('div', 's-name'); name.textContent = s.name || 'Dịch vụ';
         const price = $el('div', 's-price'); price.textContent = s.price ? Number(s.price).toLocaleString('vi-VN')+ ' đ' : '';
         const desc = $el('div', 's-desc'); desc.textContent = s.description || '';
+        const action = $el('div');
+        const btn = $el('button', 'btn-book');
+        btn.textContent = 'Đặt lịch';
+        btn.addEventListener('click', (e)=>{
+          e.stopPropagation();
+          const params = new URLSearchParams({
+            center_id: String(id),
+            service_id: String(s.id||''),
+            service_name: s.name || '',
+            price: String(s.price||''),
+            center_name: $('#clinic-name').textContent || '',
+            center_logo: (CLINIC_DATA && CLINIC_DATA.logo) ? CLINIC_DATA.logo : ''
+          });
+          location.href = 'booking.html?' + params.toString();
+        });
+        action.appendChild(btn);
+
         row.appendChild(name);
         row.appendChild(price);
         if (s.description) row.appendChild(desc);
+        row.appendChild(action);
         list.appendChild(row);
       });
       group.appendChild(list);
@@ -78,4 +107,3 @@
 
   document.addEventListener('DOMContentLoaded', init);
 })();
-

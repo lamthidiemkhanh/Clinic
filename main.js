@@ -27,9 +27,10 @@ function renderClinics(clinics) {
         const card = document.createElement('div');
         card.className = 'clinic-card';
         const ratingText = (clinic.rating ?? clinic.score ?? '').toString();
+        const logoUrl = clinic.logo || clinic.image || clinic.image_url || clinic.avatar || clinic.photo || 'logo.png';
         card.innerHTML = `
             <div class="clinic-logo">
-                <img src="${clinic.logo || 'logo.png'}" alt="Logo" style="width:32px;height:32px;object-fit:contain;">
+                <img src="${logoUrl}" alt="Logo" style="width:32px;height:32px;object-fit:contain;">
             </div>
             <div class="clinic-info">
                 <div class="clinic-name">${clinic.name || 'Tên phòng khám'}</div>

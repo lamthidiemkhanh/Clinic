@@ -12,8 +12,14 @@ switch ($method) {
             $stmt->execute([$_GET['id']]);
             echo json_encode($stmt->fetch(PDO::FETCH_ASSOC));
         } else {
-            $stmt = $conn->query("SELECT * FROM service WHERE deleted_at IS NULL");
-            echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
+            if (isset($_GET['center_id'])) {
+                $stmt = $conn->prepare("SELECT * FROM service WHERE center_id = ? AND deleted_at IS NULL");
+                $stmt->execute([$_GET['center_id']]);
+                echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
+            } else {
+                $stmt = $conn->query("SELECT * FROM service WHERE deleted_at IS NULL");
+                echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
+            }
         }
         break;
 

@@ -160,6 +160,23 @@ body {
     font-size: 15px;
     color: #555;
 }
+.card { background:#fff; border-radius:16px; box-shadow:0 2px 8px rgba(0,0,0,0.04); padding:16px; max-width:900px; margin:16px auto; }
+
+/* Detail page */
+#clinic-detail-page .detail-main { max-width: 900px; margin: 0 auto; }
+#clinic-detail-page .clinic-hero { max-width: 900px; height: 220px; margin: 16px auto 0 auto; background:#f0f4fa; border-radius:16px; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+#clinic-detail-page .clinic-hero img { width:100%; height:100%; object-fit:cover; }
+#clinic-detail-page .clinic-title { font-size:22px; font-weight:700; margin-bottom:6px; }
+#clinic-detail-page .summary-stats { display:flex; gap:16px; margin-top:8px; }
+#clinic-detail-page .summary-stats .stat { display:flex; align-items:center; gap:6px; color:#2a7ae4; font-weight:600; }
+#clinic-detail-page .clinic-services h2 { margin:0 0 10px 0; color:#2a7ae4; font-size:20px; }
+#clinic-detail-page .service-group { margin-bottom:12px; }
+#clinic-detail-page .service-group h3 { margin:8px 0; font-size:16px; color:#333; }
+#clinic-detail-page .service-list { display:flex; flex-direction:column; gap:10px; }
+#clinic-detail-page .service-item { display:grid; grid-template-columns: 1fr auto; gap:10px; background:#f7faff; border:1px solid #dfe8f7; border-radius:10px; padding:10px; }
+#clinic-detail-page .service-item .s-name { font-weight:600; }
+#clinic-detail-page .service-item .s-price { color:#2a7ae4; font-weight:700; }
+#clinic-detail-page .service-item .s-desc { grid-column:1 / -1; color:#555; font-size:14px; }
 .clinic-address {
     border: 1px solid #dfe8f7;
     background: #fff;

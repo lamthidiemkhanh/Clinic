@@ -40,6 +40,12 @@ function renderClinics(clinics) {
                 </div>
             </div>
         `;
+        if (clinic.id) {
+            card.style.cursor = 'pointer';
+            card.addEventListener('click', () => {
+                location.href = `clinic-detail.html?id=${encodeURIComponent(clinic.id)}`;
+            });
+        }
         list.appendChild(card);
     });
 }

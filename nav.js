@@ -1,0 +1,13 @@
+// nav.js - global footer navigation bindings
+(function(){
+  function go(url){ try { window.location.href = url; } catch(e){} }
+  document.addEventListener('DOMContentLoaded', function(){
+    var items = document.querySelectorAll('.footer-menu .footer-item');
+    if (!items || !items.length) return;
+    // Bind third item (Lịch hẹn)
+    if (items[2]) items[2].addEventListener('click', function(){ go('appointments.html'); });
+    // Optional: first item back to home
+    if (items[0]) items[0].addEventListener('click', function(){ go('index.html'); });
+  });
+})();
+

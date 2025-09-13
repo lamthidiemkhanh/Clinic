@@ -241,6 +241,24 @@ body {
   height: 100%;
   object-fit: cover;
 }
+/* Notifications page top logo - large hero style */
+#notifications-page .top-logo-bar {
+  max-width: 900px;
+  margin: 12px auto 0 auto;
+  height: 220px;
+  border-radius: 16px;
+  background: #f0f4fa;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+#notifications-page .top-logo-bar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 .clinic-address {
     border: 1px solid #dfe8f7;
     background: #fff;
@@ -326,3 +344,17 @@ body {
 .appt-card .status { color:#8a8a8a; font-size:14px; }
 .appt-card .svc-row { display:flex; justify-content:space-between; border:1px solid #e6eefb; background:#fff; padding:8px; border-radius:8px; }
 .appt-card .total { margin-top:8px; font-weight:700; }
+
+/* Notifications page */
+#notifications-page .notifications-main { max-width: 900px; margin: 16px auto; }
+.page-title { max-width: 900px; margin: 12px auto 0 auto; padding: 10px 12px; background:#efefef; border:1px solid #e2e2e2; border-radius:8px; text-align:center; font-weight:700; color:#444; letter-spacing:.5px; }
+.notif-list { display:flex; flex-direction:column; gap:12px; }
+.notif-card { border:1px solid #e6eefb; background:#fff; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.04); overflow:hidden; }
+.notif-head { font-weight:700; padding:10px 12px; background:#f7faff; color:#2a7ae4; }
+.notif-card.success .notif-head { background:#e8f5e9; color:#14804a; }
+.notif-card.cancelled .notif-head { background:#fdecea; color:#b42318; }
+.notif-card.info .notif-head { background:#eef4ff; color:#2a7ae4; }
+.notif-body { padding:12px; display:flex; align-items:center; gap:12px; }
+.notif-icon { width:36px; height:36px; border-radius:8px; background:#f0f4fa; color:#2a7ae4; display:flex; align-items:center; justify-content:center; font-size:18px; }
+.notif-title { font-weight:600; }
+.notif-sub { font-size:14px; color:#666; }

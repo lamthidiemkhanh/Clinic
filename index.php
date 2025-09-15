@@ -1,0 +1,72 @@
+<?php
+// Simple MVC front controller
+declare(strict_types=1);
+
+// Autoload very small tree
+spl_autoload_register(function($class){
+    $base = __DIR__ . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR;
+    $class = str_replace('\\', DIRECTORY_SEPARATOR, $class);
+    $paths = [
+        $base . $class . '.php',
+        $base . 'controllers' . DIRECTORY_SEPARATOR . $class . '.php',
+        $base . 'models' . DIRECTORY_SEPARATOR . $class . '.php',
+        $base . 'core' . DIRECTORY_SEPARATOR . $class . '.php',
+    ];
+    foreach($paths as $p){ if (is_file($p)) { require_once $p; return; } }
+});
+
+require_once __DIR__ . '/app/core/helpers.php';
+
+$page = $_GET['page'] ?? 'home';
+
+function controller($name){
+    $class = ucfirst($name) . 'Controller';
+    if (!class_exists($class)) {
+        http_response_code(404);
+        echo "Controller not found"; exit;
+    }
+    return new $class();
+}
+
+switch ($page) {
+    case 'home':
+        controller('home')->index();
+        break;
+    case 'notifications':
+        controller('notifications')->index();
+        break;
+    case 'appointments':
+        controller('appointments')->index();
+        break;
+    case 'settings':
+        controller('settings')->index();
+        break;
+    case 'search':
+        controller('search')->index();
+        break;
+    case 'clinic-detail':
+        controller('clinicdetail')->index();
+        break;
+    case 'admin':
+        // Temporarily disable admin home; redirect to user home
+        header('Location: index.php?page=home');
+        exit;
+    case 'api.clinic':
+        (new Api_ClinicController())->handle();
+        break;
+    case 'api.appointments':
+        (new Api_AppointmentsController())->handle();
+        break;
+    case 'api.service':
+        (new Api_ServiceController())->handle();
+        break;
+    case 'api.category_service':
+        (new Api_CategoryServiceController())->handle();
+        break;
+    case 'api.pet':
+        (new Api_PetController())->handle();
+        break;
+    default:
+        http_response_code(404);
+        echo 'Not found';
+}

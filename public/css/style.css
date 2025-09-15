@@ -1,0 +1,3 @@
+/* Public CSS proxy to keep backward compatibility */
+@import url('../../style.css');
+

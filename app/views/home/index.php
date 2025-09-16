@@ -1,11 +1,11 @@
-<div class="top-logo-bar"><img src="public/img/index-logo.png" alt="Clinic Logo"></div>
+<div class="top-logo-bar"><img src="public/img/clinic-center.png?v=3" alt="Clinic Logo"></div>
 <div class="home-search">
   <div class="search-bar">
     <input type="text" placeholder="Tìm kiếm dịch vụ, phòng khám...">
     <button><i class="fas fa-search"></i></button>
   </div>
   </div>
-<script src="public/js/main.js"></script>
+<script src="public/js/main.js?v=3"></script>
 
 <section class="services">
   <h2>Dịch vụ chính</h2>
@@ -14,7 +14,7 @@
     <div class="service-item"><i class="fas fa-stethoscope"></i><span>Khám bệnh</span></div>
     <div class="service-item"><i class="fas fa-syringe"></i><span>Tiêm phòng</span></div>
     <div class="service-item"><i class="fas fa-hotel"></i><span>Khách sạn</span></div>
-    <div class="service-item"><i class="fas fa-scalpel"></i><span>Phẫu thuật</span></div>
+    <div class="service-item"><i class="fas fa-kit-medical"></i><span>Phẫu thuật</span></div>
     <div class="service-item"><i class="fas fa-ellipsis-h"></i><span>Khác</span></div>
   </div>
 </section>

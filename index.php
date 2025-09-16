@@ -54,9 +54,12 @@ switch ($page) {
         // Temporarily disable admin home; redirect to user home
         header('Location: index.php?page=home');
         exit;
-    case 'api.clinic':
-        (new Api_ClinicController())->handle();
-        break;
+        case 'api.clinic':
+            (new Api_ClinicController())->handle();
+            break;
+        case 'api.seed_clinic':
+            (new Api_SeedClinicController())->handle();
+            break;
     case 'api.appointments':
         (new Api_AppointmentsController())->handle();
         break;

@@ -1,4 +1,4 @@
-<div class="top-logo-bar"><img id="booking-top-logo" src="public/img/index-logo.png" alt="Clinic Logo"></div>
+<div class="top-logo-bar"><img id="booking-top-logo" src="public/img/clinic-center.png" alt="Clinic Logo"></div>
 
 <main class="booking-layout">
   <section class="card booking-time">

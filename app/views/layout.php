@@ -6,6 +6,7 @@
   <title><?= isset($title)? htmlspecialchars($title):'Clinic' ?></title>
   <link rel="stylesheet" href="public/css/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 </head>
 <body id="<?= isset($pageId)? htmlspecialchars($pageId):'' ?>">
   <?= $content ?>
@@ -22,3 +23,4 @@
   <script src="public/js/nav.js"></script>
 </body>
 </html>
+

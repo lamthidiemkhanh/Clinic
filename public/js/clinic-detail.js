@@ -18,7 +18,7 @@
     if (String(c.is_verify) === '1' || String(c.is_verify).toLowerCase() === 'true') { $('#clinic-verified').style.display = ''; }
     var logo = c.logo || c.image || c.image_url || c.avatar || c.photo || '';
     if (logo) { $('#clinic-hero-img').src = logo; const top = document.getElementById('top-logo'); if (top) top.src = logo; }
-    else { const top = document.getElementById('top-logo'); if (top) top.src = 'logo.png'; }
+    else { const top = document.getElementById('top-logo'); if (top) top.src = 'public/img/logo.png'; }
   }
 
   function groupBy(arr, key){ return arr.reduce((acc, item)=>{ const k = item[key] ?? 'khac'; (acc[k] = acc[k] || []).push(item); return acc; }, {}); }
@@ -41,7 +41,7 @@
         btn.addEventListener('click', (e)=>{
           e.stopPropagation();
           const params = new URLSearchParams({ center_id: String(id), service_id: String(s.id||''), service_name: s.name || '', price: String(s.price||''), center_name: $('#clinic-name').textContent || '', center_logo: (CLINIC_DATA && CLINIC_DATA.logo) ? CLINIC_DATA.logo : '' });
-          location.href = 'booking.html?' + params.toString();
+          location.href = 'index.php?page=booking?' + params.toString();
         });
         action.appendChild(btn);
         row.appendChild(name); row.appendChild(price); if (s.description) row.appendChild(desc); row.appendChild(action); list.appendChild(row);

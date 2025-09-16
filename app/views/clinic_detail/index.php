@@ -1,10 +1,10 @@
 <div class="top-logo-bar">
-  <img id="top-logo" src="logo.png" alt="Clinic Logo">
+  <img id="top-logo" src="public/img/logo.png" alt="Clinic Logo">
 </div>
 
 <main class="detail-main">
   <div class="clinic-hero">
-    <img id="clinic-hero-img" src="logo.png" alt="Ảnh phòng khám">
+    <img id="clinic-hero-img" src="public/img/logo.png" alt="Ảnh phòng khám">
   </div>
 
   <section class="clinic-summary card">

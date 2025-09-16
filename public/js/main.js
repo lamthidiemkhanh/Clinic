@@ -1,6 +1,6 @@
 // Copied from root main.js (public build)
 // main.js
-// Dùng chung cho trang chủ (index) và trang tìm kiếm (search.html)
+// Dùng chung cho trang chủ (index) và trang tìm kiếm (index.php?page=search)
 
 let ALL_CLINICS = [];
 
@@ -28,7 +28,7 @@ function renderClinics(clinics) {
         const card = document.createElement('div');
         card.className = 'clinic-card';
         const ratingText = (clinic.rating ?? clinic.score ?? '').toString();
-        const logoUrl = clinic.logo || clinic.image || clinic.image_url || clinic.avatar || clinic.photo || 'logo.png';
+        const logoUrl = clinic.logo || clinic.image || clinic.image_url || clinic.avatar || clinic.photo || 'public/img/logo.png';
         card.innerHTML = `
             <div class="clinic-logo">
                 <img src="${logoUrl}" alt="Logo" style="width:32px;height:32px;object-fit:contain;">
@@ -128,7 +128,7 @@ function setupIndexPageUI() {
     const btn = $('.header .search-bar button');
     function goToSearch() {
         const q = encodeURIComponent(input?.value || '');
-        location.href = `search.html?q=${q}`;
+        location.href = `index.php?page=search?q=${q}`;
     }
     if (input) input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); goToSearch(); }});
     if (btn) btn.addEventListener('click', goToSearch);
@@ -139,7 +139,7 @@ function setupIndexPageUI() {
     serviceItems.forEach((el, idx) => {
         el.addEventListener('click', () => {
             const svc = el.dataset.service || map[idx] || 'all';
-            location.href = `search.html?service=${encodeURIComponent(svc)}`;
+            location.href = `index.php?page=search?service=${encodeURIComponent(svc)}`;
         });
     });
 }

@@ -1,4 +1,4 @@
-<div class="top-logo-bar"><img src="logo.png" alt="Clinic Logo"></div>
+<div class="top-logo-bar"><img src="public/img/logo.png" alt="Clinic Logo"></div>
 <main class="admin-main card">
   <h2 class="section-title">BẢNG ĐIỀU KHIỂN ADMIN</h2>
   <div class="admin-grid">

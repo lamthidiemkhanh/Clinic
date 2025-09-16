@@ -32,6 +32,9 @@ switch ($page) {
     case 'home':
         controller('home')->index();
         break;
+    case 'booking':
+        controller('booking')->index();
+        break;
     case 'notifications':
         controller('notifications')->index();
         break;
@@ -63,10 +66,25 @@ switch ($page) {
     case 'api.category_service':
         (new Api_CategoryServiceController())->handle();
         break;
+    case 'api.role':
+        (new Api_RoleController())->handle();
+        break;
+    case 'api.user':
+        (new Api_UserController())->handle();
+        break;
+    case 'api.animal_species':
+        (new Api_AnimalSpeciesController())->handle();
+        break;
+    case 'api.animal_breed':
+        (new Api_AnimalBreedController())->handle();
+        break;
+    case 'api.pet_type_service':
+        (new Api_PetTypeServiceController())->handle();
+        break;
     case 'api.pet':
         (new Api_PetController())->handle();
         break;
     default:
         http_response_code(404);
-        echo 'Not found';
+        view('errors/404', [ 'title' => '404', 'pageId' => 'not-found' ]);
 }

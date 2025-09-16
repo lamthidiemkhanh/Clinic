@@ -1,4 +1,4 @@
-<div class="top-logo-bar"><img src="logo.png" alt="Clinic Logo"></div>
+<div class="top-logo-bar"><img src="public/img/logo.png" alt="Clinic Logo"></div>
 <main class="notifications-main">
   <section class="card">
     <div id="notif-list" class="notif-list">

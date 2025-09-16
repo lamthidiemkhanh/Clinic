@@ -21,8 +21,8 @@
     } catch(e) {}
 
     const logoEl = document.getElementById('sum-center-logo');
-    if (logoEl) { if (!logo) logo = 'logo.png'; logoEl.src = logo; logoEl.style.display='inline-block'; }
-    const topLogo = document.getElementById('booking-top-logo'); if (topLogo) { topLogo.src = logo || 'logo.png'; topLogo.style.display = 'inline-block'; }
+    if (logoEl) { if (!logo) logo = 'public/img/logo.png'; logoEl.src = logo; logoEl.style.display='inline-block'; }
+    const topLogo = document.getElementById('booking-top-logo'); if (topLogo) { topLogo.src = logo || 'public/img/logo.png'; topLogo.style.display = 'inline-block'; }
     if (nameFromParam) { const nameEl = $('#sum-center'); if (nameEl) nameEl.textContent = nameFromParam; }
   }
   document.addEventListener('DOMContentLoaded', init);

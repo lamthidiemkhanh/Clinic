@@ -7,7 +7,7 @@
         const k = btn.getAttribute('data-key');
         // Hook up to real pages later; for now basic routing
         // 'appointments' tile was removed per request
-        if (k==='clinics') return go('search.html');
+        if (k==='clinics') return go('index.php?page=search');
         if (k==='customers') return alert('Đi tới quản lý Khách hàng (đang phát triển)');
         if (k==='schedules') return alert('Đi tới quản lý Lịch khám (đang phát triển)');
         if (k==='users') return alert('Đi tới quản lý User (đang phát triển)');

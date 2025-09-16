@@ -1,4 +1,4 @@
-<div class="top-logo-bar"><img src="index-logo.png" alt="Clinic Logo"></div>
+<div class="top-logo-bar"><img src="public/img/index-logo.png" alt="Clinic Logo"></div>
 <div class="home-search">
   <div class="search-bar">
     <input type="text" placeholder="Tìm kiếm dịch vụ, phòng khám...">

@@ -1,5 +1,5 @@
 <header class="header">
-  <div class="logo"><img src="logo.png" alt="Clinic Logo" height="48"></div>
+  <div class="logo"><img src="public/img/logo.png" alt="Clinic Logo" height="48"></div>
   <div class="search-bar">
     <input type="text" placeholder="Tìm kiếm dịch vụ, phòng khám...">
     <button title="Tìm"><i class="fas fa-search"></i></button>

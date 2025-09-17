@@ -30,7 +30,7 @@ class Api_CategoryServiceController {
     }
     private function put(): void {
         header('Content-Type: application/json; charset=utf-8');
-        if (!isset($_GET['id'])) return $this->json(['error'=>'Missing id'],400);
+        if (!isset($_GET['id'])) { $this->json(['error'=>'Missing id'],400); return; }
         $d = json_decode(file_get_contents('php://input'), true) ?: [];
         $st = $this->db->prepare('UPDATE category_service SET name=:name, description=:description, updated_at=NOW() WHERE id=:id');
         $st->execute([':name'=>$d['name']??null, ':description'=>$d['description']??null, ':id'=>$_GET['id']]);
@@ -38,15 +38,16 @@ class Api_CategoryServiceController {
     }
     private function delete(): void {
         header('Content-Type: application/json; charset=utf-8');
-        if (!isset($_GET['id'])) return $this->json(['error'=>'Missing id'],400);
+        if (!isset($_GET['id'])) { $this->json(['error'=>'Missing id'],400); return; }
         if (isset($_GET['force']) && $_GET['force']==='true'){
             $st = $this->db->prepare('DELETE FROM category_service WHERE id=:id');
             $st->execute([':id'=>$_GET['id']]);
-            return $this->json(['message'=>'Xóa CỨNG service thành công']);
+            $this->json(['message'=>'Xóa cứng service thành công']);
+            return;
         }
         $st = $this->db->prepare('UPDATE category_service SET deleted_at=NOW() WHERE id=:id');
         $st->execute([':id'=>$_GET['id']]);
-        $this->json(['message'=>'Xóa MỀM service thành công']);
+        $this->json(['message'=>'Xóa mềm service thành công']);
     }
     private function json($data, int $code=200){ http_response_code($code); echo json_encode($data, JSON_UNESCAPED_UNICODE); }
 }

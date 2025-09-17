@@ -63,12 +63,14 @@ switch ($page) {
     case 'api.appointments':
         (new Api_AppointmentsController())->handle();
         break;
-    case 'api.service':
-        (new Api_ServiceController())->handle();
-        break;
-    case 'api.category_service':
-        (new Api_CategoryServiceController())->handle();
-        break;
+        case 'api.service':
+            if (!class_exists('Api_ServiceController')) require_once __DIR__ . '/app/controllers/Api/ServiceController.php';
+            (new Api_ServiceController())->handle();
+            break;
+        case 'api.category_service':
+            if (!class_exists('Api_CategoryServiceController')) require_once __DIR__ . '/app/controllers/Api/CategoryServiceController.php';
+            (new Api_CategoryServiceController())->handle();
+            break;
     case 'api.role':
         (new Api_RoleController())->handle();
         break;

@@ -23,33 +23,46 @@
 
   function groupBy(arr, key){ return arr.reduce((acc, item)=>{ const k = item[key] ?? 'khac'; (acc[k] = acc[k] || []).push(item); return acc; }, {}); }
 
-  function renderServices(services, categories){
-    const byCat = groupBy(services, 'category_service_id');
-    const container = $('#service-groups'); container.innerHTML = '';
-    Object.keys(byCat).forEach(cid => {
-      const group = $el('div', 'service-group');
-      const catName = (categories.find(c=> String(c.id)===String(cid)) || {}).name || 'Khác';
-      const h3 = $el('h3'); h3.textContent = catName; group.appendChild(h3);
-      const list = $el('div', 'service-list');
-      byCat[cid].forEach(s => {
-        const row = $el('div', 'service-item');
-        const name = $el('div', 's-name'); name.textContent = s.name || 'Dịch vụ';
-        const price = $el('div', 's-price'); price.textContent = s.price ? Number(s.price).toLocaleString('vi-VN')+ ' đ' : '';
-        const desc = $el('div', 's-desc'); desc.textContent = s.description || '';
-        const action = $el('div');
-        const btn = $el('button', 'btn-book'); btn.textContent = 'Đặt lịch';
-        btn.addEventListener('click', (e)=>{
-          e.stopPropagation();
-          const params = new URLSearchParams({ center_id: String(id), service_id: String(s.id||''), service_name: s.name || '', price: String(s.price||''), center_name: $('#clinic-name').textContent || '', center_logo: (CLINIC_DATA && CLINIC_DATA.logo) ? CLINIC_DATA.logo : '' });
-          location.href = 'index.php?page=booking?' + params.toString();
+      function renderServices(services, categories){
+        const container = $('#service-groups'); container.innerHTML = '';
+        const cats = Array.isArray(categories) && categories.length ? categories.slice() : [{id:'khac', name:'Dịch vụ'}];
+        // Map services with null category to 'khac'
+        const itemsByCat = services.reduce((acc, s)=>{
+          const key = (s.category_service_id ?? 'khac').toString();
+          (acc[key] = acc[key] || []).push(s);
+          return acc;
+        }, {});
+        cats.forEach(cat => {
+          const cid = (cat.id ?? 'khac').toString();
+          const listItems = itemsByCat[cid] || [];
+          const group = $el('div', 'service-group');
+          const h3 = $el('h3'); h3.textContent = cat.name || 'Khác'; group.appendChild(h3);
+          const list = $el('div', 'service-list');
+          if (!listItems.length){
+            const empty = $el('div', 'service-item');
+            const name = $el('div', 's-name'); name.textContent = 'Chưa có dịch vụ';
+            empty.appendChild(name); list.appendChild(empty);
+          } else {
+            listItems.forEach(s => {
+              const row = $el('div', 'service-item');
+              const name = $el('div', 's-name'); name.textContent = s.name || 'Dịch vụ';
+              const price = $el('div', 's-price'); price.textContent = s.price ? Number(s.price).toLocaleString('vi-VN')+ ' đ' : '';
+              const desc = $el('div', 's-desc'); desc.textContent = s.description || '';
+              const action = $el('div');
+              const btn = $el('button', 'btn-book'); btn.textContent = 'Đặt lịch';
+              btn.addEventListener('click', (e)=>{
+                e.stopPropagation();
+                const params = new URLSearchParams({ center_id: String(id), service_id: String(s.id||''), service_name: s.name || '', price: String(s.price||''), center_name: $('#clinic-name').textContent || '', center_logo: (CLINIC_DATA && CLINIC_DATA.logo) ? CLINIC_DATA.logo : '' });
+                location.href = 'index.php?page=booking?' + params.toString();
+              });
+              action.appendChild(btn);
+              row.appendChild(name); row.appendChild(price); if (s.description) row.appendChild(desc); row.appendChild(action); list.appendChild(row);
+            });
+          }
+          group.appendChild(list); container.appendChild(group);
         });
-        action.appendChild(btn);
-        row.appendChild(name); row.appendChild(price); if (s.description) row.appendChild(desc); row.appendChild(action); list.appendChild(row);
-      });
-      group.appendChild(list); container.appendChild(group);
-    });
-    const count = services.length; $('#clinic-reviews').textContent = count + ' đánh giá';
-  }
+        const count = services.length; $('#clinic-reviews').textContent = count + ' đánh giá';
+      }
 
   async function init(){
     try {

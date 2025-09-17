@@ -76,16 +76,18 @@ body {
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
     gap: 24px;
 }
-.service-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background: #f0f4fa;
-    border-radius: 12px;
-    padding: 24px 0;
-    cursor: pointer;
-    transition: box-shadow 0.2s;
-}
+     .service-item {
+         display: flex;
+         flex-direction: column;
+         align-items: center;
+         background: #f0f4fa;
+         border-radius: 12px;
+         padding: 24px 0;
+         cursor: pointer;
+         transition: box-shadow 0.2s;
+         text-decoration: none;
+         color: inherit;
+     }
 .service-item:hover {
     box-shadow: 0 4px 16px rgba(42,122,228,0.08);
 }

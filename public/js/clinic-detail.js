@@ -32,19 +32,19 @@
           (acc[key] = acc[key] || []).push(s);
           return acc;
         }, {});
+        let anyAdded = false;
         cats.forEach(cat => {
           const cid = (cat.id ?? 'khac').toString();
           const listItems = itemsByCat[cid] || [];
-          const group = $el('div', 'service-group');
-          const h3 = $el('h3'); h3.textContent = cat.name || 'Khác'; group.appendChild(h3);
-          const list = $el('div', 'service-list');
           if (!listItems.length){
-            const empty = $el('div', 'service-item');
-            const name = $el('div', 's-name'); name.textContent = 'Chưa có dịch vụ';
-            empty.appendChild(name); list.appendChild(empty);
+            return; // skip empty category completely
           } else {
+            const group = $el('div', 'service-group');
+            const h3 = $el('h3'); h3.textContent = cat.name || 'Khác'; group.appendChild(h3);
+            const list = $el('div', 'service-list');
             listItems.forEach(s => {
               const row = $el('div', 'service-item');
+              const icon = $el('div', 's-icon'); icon.innerHTML = '<i class="far fa-image"></i>';
               const name = $el('div', 's-name'); name.textContent = s.name || 'Dịch vụ';
               const price = $el('div', 's-price'); price.textContent = s.price ? Number(s.price).toLocaleString('vi-VN')+ ' đ' : '';
               const desc = $el('div', 's-desc'); desc.textContent = s.description || '';
@@ -53,14 +53,22 @@
               btn.addEventListener('click', (e)=>{
                 e.stopPropagation();
                 const params = new URLSearchParams({ center_id: String(id), service_id: String(s.id||''), service_name: s.name || '', price: String(s.price||''), center_name: $('#clinic-name').textContent || '', center_logo: (CLINIC_DATA && CLINIC_DATA.logo) ? CLINIC_DATA.logo : '' });
-                location.href = 'index.php?page=booking?' + params.toString();
+                location.href = 'index.php?page=booking&' + params.toString();
               });
               action.appendChild(btn);
-              row.appendChild(name); row.appendChild(price); if (s.description) row.appendChild(desc); row.appendChild(action); list.appendChild(row);
+              row.appendChild(icon); row.appendChild(name); row.appendChild(price); if (s.description) row.appendChild(desc); row.appendChild(action); list.appendChild(row);
             });
+            group.appendChild(list); container.appendChild(group);
+            anyAdded = true;
           }
-          group.appendChild(list); container.appendChild(group);
         });
+        if (!anyAdded){
+          const empty = $el('div', 'service-item');
+          const name = $el('div', 's-name'); name.textContent = 'Chưa có dịch vụ.';
+          empty.appendChild($el('div','s-icon'));
+          empty.appendChild(name);
+          container.appendChild(empty);
+        }
         const count = services.length; $('#clinic-reviews').textContent = count + ' đánh giá';
       }
 

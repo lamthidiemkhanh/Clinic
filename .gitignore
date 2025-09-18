@@ -1,0 +1,15 @@
+# IDE settings (safe to ignore/delete)
+.idea/
+.vscode/
+
+# Build/output caches (add more as needed)
+node_modules/
+dist/
+
+# Local environment files
+.env
+.env.*
+
+# Mac/Windows noise
+.DS_Store
+Thumbs.db

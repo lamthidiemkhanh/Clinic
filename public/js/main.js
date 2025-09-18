@@ -52,10 +52,13 @@ function applyFilters(){
   let filtered = (ALL_CLINICS||[]).filter(c=>{
     const text = norm(`${c.name??''} ${c.description??''} ${c.address??''}`);
     const matchQ = !q || text.includes(q);
-    const sKey = norm((c.service_category||c.category||'').toString());
-    const pKey = norm((c.pet_type||'').toString());
-    const matchS = s==='all' || sKey.includes(s);
-    const matchP = p==='all' || pKey.includes(p);
+    const sKeyRaw = (c.service_category!=null? c.service_category : (c.category!=null? c.category : ''));
+    const pKeyRaw = (c.pet_type!=null? c.pet_type : '');
+    const sKey = norm(sKeyRaw.toString());
+    const pKey = norm(pKeyRaw.toString());
+    // Nếu dữ liệu không có trường service/pet thì coi như khớp
+    const matchS = (s==='all') || (!sKey && s!=='all' ? true : sKey.includes(s));
+    const matchP = (p==='all') || (!pKey && p!=='all' ? true : pKey.includes(p));
     return matchQ && matchS && matchP;
   });
   // If no results and user typed a query, relax service/pet filters
@@ -68,9 +71,13 @@ function applyFilters(){
 function parseParams(){ const p = new URLSearchParams(location.search); return { q:p.get('q')||'', service:p.get('service')||'all', pet:p.get('pet')||'all' }; }
 
 function setupSearchPage(){
-  const { q, service, pet } = parseParams();
+  let { q, service, pet } = parseParams();
   const input = $('.search-bar input');
-  if (input){ input.value = q; input.addEventListener('input', applyFilters); }
+  let currentInput = (input?.value || '').trim();
+  if (!q || q.toLowerCase() === 'search') q = currentInput;
+  if (q && q.toLowerCase() === 'search') q = '';
+  if (currentInput && currentInput.toLowerCase() === 'search') currentInput = '';
+  if (input){ input.value = q || currentInput; input.addEventListener('input', applyFilters); }
   const btn = $('.search-bar button'); if (btn){ btn.addEventListener('click', e=>{ e.preventDefault(); applyFilters(); }); }
   const sBtn = document.querySelector(`[data-service="${service}"]`); if (sBtn){ const g=sBtn.parentElement; g.querySelectorAll('[data-service]').forEach(x=>x.classList.remove('active')); sBtn.classList.add('active'); }
   const pBtn = document.querySelector(`[data-pet="${pet}"]`); if (pBtn){ const g=pBtn.parentElement; g.querySelectorAll('[data-pet]').forEach(x=>x.classList.remove('active')); pBtn.classList.add('active'); }
@@ -96,6 +103,11 @@ function setupHomePage(){
 }
 
 window.addEventListener('DOMContentLoaded', ()=>{
-  if (document.getElementById('clinic-search-page')) setupSearchPage();
-  else setupHomePage();
+  if (document.getElementById('clinic-search-page')) {
+    setupSearchPage();
+  } else {
+    setupHomePage();
+    // Nạp danh sách trên trang Home
+    fetchClinics().then(()=>{ applyFilters(); });
+  }
 });

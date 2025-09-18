@@ -195,10 +195,12 @@ body {
 #clinic-detail-page .service-group { margin-bottom:12px; }
 #clinic-detail-page .service-group h3 { margin:8px 0; font-size:16px; color:#333; }
 #clinic-detail-page .service-list { display:flex; flex-direction:column; gap:10px; }
-#clinic-detail-page .service-item { display:grid; grid-template-columns: 1fr auto; gap:10px; background:#f7faff; border:1px solid #dfe8f7; border-radius:10px; padding:10px; }
-#clinic-detail-page .service-item .s-name { font-weight:600; }
-#clinic-detail-page .service-item .s-price { color:#2a7ae4; font-weight:700; }
-#clinic-detail-page .service-item .s-desc { grid-column:1 / -1; color:#555; font-size:14px; }
+    #clinic-detail-page .service-item { display:grid; grid-template-columns: 36px 1fr auto; gap:10px; background:#f7faff; border:1px solid #dfe8f7; border-radius:10px; padding:10px; align-items:center; }
+    #clinic-detail-page .service-item .s-icon { width:32px; height:32px; display:flex; align-items:center; justify-content:center; color:#2a7ae4; }
+    #clinic-detail-page .service-item .s-icon img { width:28px; height:28px; object-fit:contain; }
+    #clinic-detail-page .service-item .s-name { font-weight:600; }
+    #clinic-detail-page .service-item .s-price { color:#2a7ae4; font-weight:700; }
+    #clinic-detail-page .service-item .s-desc { grid-column:1 / -1; color:#555; font-size:14px; margin-left:36px; }
 #clinic-detail-page .btn-book { background:#2a7ae4; color:#fff; border:none; padding:8px 12px; border-radius:8px; cursor:pointer; }
 
 /* Booking page */
@@ -343,7 +345,7 @@ body {
     cursor: pointer;
 }
 .footer-item i {
-    font-size: 22px;
+    font-size: 26px; /* larger by default */
     margin-bottom: 2px;
 }
 .footer-item .badge { position:absolute; transform: translate(10px,-8px); background:#b42318; color:#fff; border-radius:999px; padding:2px 6px; font-size:11px; line-height:1; display:none; align-items:center; justify-content:center; }
@@ -353,7 +355,7 @@ body {
     /* On desktop, pin the sidebar to the left */
     .footer-nav {
         position: fixed; /* keep it beside content, not below */
-        width: 220px;
+        width: 165px; /* 3/4 of previous 220px */
         height: 100vh;
         left: 0;
         top: 0;
@@ -364,13 +366,18 @@ body {
     }
     .footer-menu {
         flex-direction: column;
-        align-items: flex-start;
-        padding: 32px 0 0 24px;
-        gap: 32px;
+        align-items: center; /* center items in the column */
+        justify-content: flex-start;
+        padding: 32px 0; /* remove left padding, center vertically */
+        gap: 36px; /* a bit more breathing room */
     }
     body {
-        margin-left: 220px;
+        margin-left: 165px; /* match sidebar width */
     }
+
+    /* Make sidebar icons a bit larger on desktop */
+    .footer-item i { font-size: 28px; }
+    .footer-item { text-align: center; width: 100%; }
 }
 
 /* Chỉ hiển thị Filters trên trang search.html */

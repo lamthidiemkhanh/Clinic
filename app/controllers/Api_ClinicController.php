@@ -28,10 +28,38 @@ class Api_ClinicController {
                 return;
             }
             if ($this->db && $this->tableExists('clinic_center')){
-                $q = $this->db->query('SELECT * FROM clinic_center WHERE deleted_at IS NULL');
-                $rows = $q->fetchAll(PDO::FETCH_ASSOC);
-                echo json_encode($rows, JSON_UNESCAPED_UNICODE);
-                return;
+                // If service + category tables exist, enrich clinics with service categories
+                $hasService = $this->tableExists('service');
+                $hasCat = $this->tableExists('category_service');
+                if ($hasService && $hasCat) {
+                    $sql = "SELECT cc.id, cc.name, cc.description, cc.address, cc.is_verify,
+                                   GROUP_CONCAT(DISTINCT cs.name SEPARATOR ',') AS categories
+                            FROM clinic_center cc
+                            LEFT JOIN service s ON s.center_id = cc.id AND s.deleted_at IS NULL
+                            LEFT JOIN category_service cs ON cs.id = s.category_service_id AND cs.deleted_at IS NULL
+                            WHERE cc.deleted_at IS NULL
+                            GROUP BY cc.id, cc.name, cc.description, cc.address";
+                    $st = $this->db->prepare($sql);
+                    $st->execute();
+                    $rows = $st->fetchAll(PDO::FETCH_ASSOC);
+                    // Map category names to normalized slug string for front-end filtering
+                    foreach ($rows as &$r) {
+                        $cats = array_filter(array_map('trim', explode(',', (string)($r['categories'] ?? ''))));
+                        $slugs = [];
+                        foreach ($cats as $cname) {
+                            $slugs[] = $this->slugify($cname);
+                        }
+                        $r['service_category'] = implode(' ', array_unique($slugs));
+                        unset($r['categories']);
+                    }
+                    echo json_encode($rows, JSON_UNESCAPED_UNICODE);
+                    return;
+                } else {
+                    $q = $this->db->query('SELECT id, name, description, address FROM clinic_center WHERE deleted_at IS NULL');
+                    $rows = $q->fetchAll(PDO::FETCH_ASSOC);
+                    echo json_encode($rows, JSON_UNESCAPED_UNICODE);
+                    return;
+                }
             }
             // Fallback if table not found
             echo json_encode($this->sampleClinics(), JSON_UNESCAPED_UNICODE);
@@ -53,6 +81,34 @@ class Api_ClinicController {
             [ 'id'=>2, 'name'=>'PetCare Center', 'address'=>'Cầu Giấy, Hà Nội', 'description'=>'Khám bệnh, tiêm phòng, grooming', 'logo'=>'public/img/clinic-center.png', 'rating'=>4.5 ],
             [ 'id'=>3, 'name'=>'Happy Paw Clinic', 'address'=>'Ngũ Hành Sơn, Đà Nẵng', 'description'=>'Khám – phẫu thuật – lưu trú', 'logo'=>'public/img/clinic-center.png', 'rating'=>4.6 ],
         ];
+    }
+    /**
+     * Convert Vietnamese (and general UTF-8) names to simple slugs that
+     * match front-end chips, e.g. "Khám bệnh" -> "kham-benh".
+     */
+    private function slugify(string $name): string {
+        $s = $name;
+        // remove accents
+        if (function_exists('transliterator_transliterate')) {
+            $s = transliterator_transliterate('Any-Latin; Latin-ASCII', $s);
+        } else {
+            $s = iconv('UTF-8','ASCII//TRANSLIT//IGNORE',$s) ?: $s;
+        }
+        $s = strtolower($s);
+        $s = preg_replace('/[^a-z0-9]+/','-',$s);
+        $s = trim($s,'-');
+        // small aliases for common categories
+        $map = [
+            'kham' => 'kham-benh',
+            'kham-benh' => 'kham-benh',
+            'tiem' => 'tiem-phong',
+            'tiem-phong' => 'tiem-phong',
+            'spa' => 'spa', 'grooming' => 'spa', 'spa-grooming' => 'spa',
+            'khach-san' => 'khach-san', 'luu-tru' => 'khach-san',
+            'phau-thuat' => 'phau-thuat',
+            'khac' => 'khac'
+        ];
+        return $map[$s] ?? $s;
     }
     private function post(): void {
         header('Content-Type: application/json; charset=utf-8');

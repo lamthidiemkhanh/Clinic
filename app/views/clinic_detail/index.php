@@ -21,4 +21,4 @@
   </section>
 </main>
 
-<script src="public/js/clinic-detail.js"></script>
+<script src="public/js/clinic-detail.js?v=2"></script>

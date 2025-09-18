@@ -5,7 +5,7 @@ info:
   description: API for managing pets
 
 paths:
-  /pet.php:
+  /index.php?page=api.pet:
     get:
       summary: Get pet(s)
       parameters:

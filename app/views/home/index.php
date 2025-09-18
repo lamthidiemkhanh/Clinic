@@ -38,6 +38,18 @@
 
 <section class="clinics">
   <h2>Phòng khám và dịch vụ gần bạn</h2>
-  <div id="clinic-list"></div>
+  <div id="clinic-list">
+    <?php if (!empty($clinics)): ?>
+      <?php foreach ($clinics as $c): ?>
+        <div class="clinic-card">
+          <div class="clinic-logo"><img src="public/img/clinic-center.png" alt="Logo" style="width:32px;height:32px;object-fit:contain;"></div>
+          <div class="clinic-info">
+            <div class="clinic-name"><?= htmlspecialchars($c['name'] ?? '') ?></div>
+            <div class="clinic-address"><?= htmlspecialchars(($c['address'] ?? '') ?: ($c['description'] ?? '')) ?></div>
+          </div>
+        </div>
+      <?php endforeach; ?>
+    <?php endif; ?>
+  </div>
   </section>
 

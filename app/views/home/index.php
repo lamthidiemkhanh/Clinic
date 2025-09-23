@@ -1,12 +1,12 @@
-﻿<div class="top-logo-bar"><img src="public/img/clinic-center.png?v=3" alt="Clinic Logo"></div>
+<div class="top-logo-bar index-hero"></div>
 <div class="home-search">
-  <form class="search-bar" action="index.php" method="get" onsubmit="">
+  <form class="search-bar" action="index.php" method="get">
     <input type="hidden" name="page" value="search">
     <input type="text" name="q" placeholder="Tìm kiếm dịch vụ, phòng khám...">
     <button type="submit"><i class="fas fa-search"></i></button>
   </form>
-  </div>
-<script src="public/js/main.js?v=4"></script>
+</div>
+<script src="public/js/main.js?v=9"></script>
 
 <section class="services">
   <h2>Dịch vụ chính</h2>
@@ -37,19 +37,9 @@
 </section>
 
 <section class="clinics">
-  <h2>Phòng khám và dịch vụ gần bạn</h2>
+  <h2>Danh sách phòng khám</h2>
   <div id="clinic-list">
-    <?php if (!empty($clinics)): ?>
-      <?php foreach ($clinics as $c): ?>
-        <div class="clinic-card">
-          <div class="clinic-logo"><img src="public/img/clinic-center.png" alt="Logo" style="width:32px;height:32px;object-fit:contain;"></div>
-          <div class="clinic-info">
-            <div class="clinic-name"><?= htmlspecialchars($c['name'] ?? '') ?></div>
-            <div class="clinic-address"><?= htmlspecialchars(($c['address'] ?? '') ?: ($c['description'] ?? '')) ?></div>
-          </div>
-        </div>
-      <?php endforeach; ?>
-    <?php endif; ?>
+   
   </div>
-  </section>
+</section>
 

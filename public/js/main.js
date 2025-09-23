@@ -1,48 +1,78 @@
-// Search + Home interactions (UTF-8)
+console.log("main.js loaded ");
+// Main interactions for Home and Search pages
 let ALL_CLINICS = [];
-
 const $ = (sel, root=document) => root.querySelector(sel);
 const $all = (sel, root=document) => Array.from(root.querySelectorAll(sel));
 
 function norm(s){
-  try { return (s||'').toString().normalize('NFD').replace(/\p{Diacritic}+/gu,'').toLowerCase(); }
-  catch(e){ return (s||'').toString().toLowerCase(); }
-}
-
-async function fetchClinics(){
-  try{
-    const res = await fetch('index.php?page=api.clinic');
-    if(!res.ok) throw new Error('fetch_error');
-    const data = await res.json();
-    ALL_CLINICS = Array.isArray(data)? data: [];
-  }catch(e){
-    // Minimal fallback to keep UI functional
-    ALL_CLINICS = [
-      { id:1, name:'Bệnh viện Thú y Petcare', address:'Q10 - TP.HCM', description:'Dịch vụ thú y', logo:'public/img/clinic-center.png', rating:4.7 },
-      { id:3, name:'ThiThi Pet Clinic', address:'Bình Thạnh - TP.HCM', description:'Khám – tiêm phòng – grooming', logo:'public/img/clinic-center.png', rating:4.6 }
-    ];
+  // Avoid Unicode property escapes for broad browser support
+  try {
+    return (s||'')
+      .toString()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // strip combining marks
+      .toLowerCase();
+  } catch(e){
+    try { return (s||'').toString().toLowerCase(); }
+    catch(_) { return ''; }
   }
 }
 
+async function fetchClinics(){
+  try {
+    const res = await fetch('index.php?page=api.clinic');
+    if(!res.ok) throw new Error('fetch_error');
+    const data = await res.json();
+    console.log("API data:", data);
+
+    if (!Array.isArray(data) || data.length === 0) throw new Error('empty');
+
+    ALL_CLINICS = data;
+    renderClinics(ALL_CLINICS); // 👈 render trực tiếp
+  } catch(e){
+    console.error("API fetch error:", e);
+  }
+}
+
+
 function renderClinics(list){
-  const el = $('#clinic-list');
-  if (!el) return;
-  el.innerHTML='';
+    console.log("Rendering...", list);
+  const el = document.querySelector('#clinic-list');
+  if (!el) {
+    console.warn("Không tìm thấy #clinic-list");
+    return;
+  }
+  el.innerHTML = '';
+  
+
   (list||[]).forEach(c=>{
     const card = document.createElement('div');
     card.className = 'clinic-card';
+
     const logo = c.logo || c.image || c.image_url || c.avatar || c.photo || 'public/img/clinic-center.png';
+    const rating = c.rating ?? c.score; // chỉ lấy nếu có
+
     card.innerHTML = `
-      <div class="clinic-logo"><img src="${logo}" alt="Logo" style="width:32px;height:32px;object-fit:contain;"></div>
+      <div class="clinic-logo">
+        <img src="${logo}" alt="Logo" style="width:32px;height:32px;object-fit:contain;">
+      </div>
       <div class="clinic-info">
         <div class="clinic-name">${c.name || 'Phòng khám'}</div>
         <div class="clinic-address">${c.address || c.description || ''}</div>
-        <div class="clinic-meta"><i class="fas fa-star"></i><span>${(c.rating ?? c.score ?? '').toString()}</span></div>
-      </div>`;
-    if (c.id){ card.style.cursor='pointer'; card.addEventListener('click', ()=>{ location.href=`index.php?page=clinic-detail&id=${encodeURIComponent(c.id)}`; }); }
+        ${rating ? `<div class="clinic-meta"><i class="fas fa-star"></i><span>${rating}</span></div>` : ''}
+      </div>
+    `;
+
+    if (c.id){
+      card.style.cursor='pointer';
+      card.addEventListener('click', ()=>{
+        location.href=`index.php?page=clinic-detail&id=${encodeURIComponent(c.id)}`;
+      });
+    }
     el.appendChild(card);
   });
 }
+
 
 function applyFilters(){
   const inputEl = $('.search-bar input');
@@ -52,16 +82,12 @@ function applyFilters(){
   let filtered = (ALL_CLINICS||[]).filter(c=>{
     const text = norm(`${c.name??''} ${c.description??''} ${c.address??''}`);
     const matchQ = !q || text.includes(q);
-    const sKeyRaw = (c.service_category!=null? c.service_category : (c.category!=null? c.category : ''));
-    const pKeyRaw = (c.pet_type!=null? c.pet_type : '');
-    const sKey = norm(sKeyRaw.toString());
-    const pKey = norm(pKeyRaw.toString());
-    // Nếu dữ liệu không có trường service/pet thì coi như khớp
+    const sKey = norm((c.service_category||c.category||'').toString());
+    const pKey = norm((c.pet_type||'').toString());
     const matchS = (s==='all') || (!sKey && s!=='all' ? true : sKey.includes(s));
     const matchP = (p==='all') || (!pKey && p!=='all' ? true : pKey.includes(p));
     return matchQ && matchS && matchP;
   });
-  // If no results and user typed a query, relax service/pet filters
   if (!filtered.length && q) {
     filtered = (ALL_CLINICS||[]).filter(c=> norm(`${c.name??''} ${c.description??''} ${c.address??''}`).includes(q));
   }
@@ -73,11 +99,7 @@ function parseParams(){ const p = new URLSearchParams(location.search); return {
 function setupSearchPage(){
   let { q, service, pet } = parseParams();
   const input = $('.search-bar input');
-  let currentInput = (input?.value || '').trim();
-  if (!q || q.toLowerCase() === 'search') q = currentInput;
-  if (q && q.toLowerCase() === 'search') q = '';
-  if (currentInput && currentInput.toLowerCase() === 'search') currentInput = '';
-  if (input){ input.value = q || currentInput; input.addEventListener('input', applyFilters); }
+  if (input){ input.value = q; input.addEventListener('input', applyFilters); }
   const btn = $('.search-bar button'); if (btn){ btn.addEventListener('click', e=>{ e.preventDefault(); applyFilters(); }); }
   const sBtn = document.querySelector(`[data-service="${service}"]`); if (sBtn){ const g=sBtn.parentElement; g.querySelectorAll('[data-service]').forEach(x=>x.classList.remove('active')); sBtn.classList.add('active'); }
   const pBtn = document.querySelector(`[data-pet="${pet}"]`); if (pBtn){ const g=pBtn.parentElement; g.querySelectorAll('[data-pet]').forEach(x=>x.classList.remove('active')); pBtn.classList.add('active'); }
@@ -94,20 +116,40 @@ function setupSearchPage(){
   fetchClinics().then(applyFilters);
 }
 
-function setupHomePage(){
-  const formInput = document.querySelector('.home-search .search-bar input');
-  const formBtn = document.querySelector('.home-search .search-bar button');
-  const go=()=>{ const q=encodeURIComponent(formInput?.value||''); const base='index.php?page=search'; location.href = q? `${base}&q=${q}`: base; };
-  if (formInput) formInput.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); go(); }});
-  if (formBtn) formBtn.addEventListener('click', e=>{ e.preventDefault(); go(); });
+function applyFilters(){
+  const inputEl = $('.search-bar input');
+  const q = norm(inputEl?.value || '');
+  const s = ($('.chip-group [data-service].active')?.dataset.service)||'all';
+  const p = ($('.chip-group [data-pet].active')?.dataset.pet)||'all';
+
+  // nếu không có filter gì → show tất cả
+  if (!q && s==='all' && p==='all') {
+    renderClinics(ALL_CLINICS);
+    return;
+  }
+
+  let filtered = (ALL_CLINICS||[]).filter(c=>{
+    const text = norm(`${c.name??''} ${c.description??''} ${c.address??''}`);
+    const matchQ = !q || text.includes(q);
+    const sKey = norm((c.service_category||c.category||'').toString());
+    const pKey = norm((c.pet_type||'').toString());
+    const matchS = (s==='all') || sKey.includes(s);
+    const matchP = (p==='all') || pKey.includes(p);
+    return matchQ && matchS && matchP;
+  });
+  renderClinics(filtered);
 }
+
 
 window.addEventListener('DOMContentLoaded', ()=>{
   if (document.getElementById('clinic-search-page')) {
     setupSearchPage();
   } else {
     setupHomePage();
-    // Nạp danh sách trên trang Home
-    fetchClinics().then(()=>{ applyFilters(); });
   }
 });
+function setupHomePage(){
+  console.log("setupHomePage chạy...");
+  fetchClinics(); // fetchClinics đã tự render rồi
+}
+

@@ -41,4 +41,25 @@
   </div>
 </section>
 
-<script src="public/js/main.js?v=6"></script>
+<script src="public/js/main.js?v=9"></script>
+<script>
+  // Robust fetch override: use demo data if API is empty or fails
+  window.fetchClinics = async function(){
+    try{
+      const res = await fetch('index.php?page=api.clinic');
+      if(!res.ok) throw new Error('fetch_error');
+      const data = await res.json();
+      if (!Array.isArray(data) || data.length === 0) throw new Error('empty');
+      window.ALL_CLINICS = data;
+    }catch(e){
+      window.ALL_CLINICS = [
+        { id:1, name:'Benh vien Thu y Petcare', address:'Q10 - TP.HCM', description:'Kham benh; Tiem phong', service_category:'kham-benh tiem-phong', logo:'public/img/clinic-center.png', rating:4.7 },
+        { id:2, name:'Benh vien Thu y Nong Lam', address:'TP. Thu Duc - TP.HCM', description:'Kham benh', service_category:'kham-benh', logo:'public/img/clinic-center.png', rating:4.6 },
+        { id:3, name:'ThiThi Pet Clinic', address:'Q. Binh Thanh - TP.HCM', description:'Spa - Grooming', service_category:'spa', logo:'public/img/clinic-center.png', rating:4.5 }
+      ];
+    }
+  }
+</script>
+
+
+

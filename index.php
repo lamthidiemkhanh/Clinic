@@ -20,12 +20,16 @@ require_once __DIR__ . '/app/core/helpers.php';
 $page = $_GET['page'] ?? 'home';
 
 function controller($name){
-    $class = ucfirst($name) . 'Controller';
-    if (!class_exists($class)) {
-        http_response_code(404);
-        echo "Controller not found"; exit;
+    // Try simple, then StudlyCase converted from dash/underscore
+    $candidates = [];
+    $candidates[] = ucfirst($name) . 'Controller';
+    $studly = str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $name)));
+    $candidates[] = $studly . 'Controller';
+    foreach ($candidates as $class) {
+        if (class_exists($class)) return new $class();
     }
-    return new $class();
+    http_response_code(404);
+    echo "Controller not found"; exit;
 }
 
 switch ($page) {
@@ -48,14 +52,15 @@ switch ($page) {
         controller('search')->index();
         break;
     case 'clinic-detail':
-        controller('clinicdetail')->index();
+        controller('clinic-detail')->index();
         break;
     case 'admin':
         // Temporarily disable admin home; redirect to user home
         header('Location: index.php?page=home');
         exit;
         case 'api.clinic':
-            (new Api_ClinicController())->handle();
+            $controller = new Api_ClinicController();
+            $controller->index();
             break;
         case 'api.seed_clinic':
             (new Api_SeedClinicController())->handle();

@@ -1,4 +1,4 @@
-<div class="top-logo-bar"><img id="booking-top-logo" src="public/img/clinic-center.png" alt="Clinic Logo"></div>
+﻿<div class="top-logo-bar"><img id="booking-top-logo" src="public/img/clinic-center.png" alt="Clinic Logo"></div>
 
 <main class="booking-layout">
   <section class="card booking-time">
@@ -26,25 +26,33 @@
   <section class="card booking-summary">
     <h2>Đặt lịch</h2>
     <div class="summary-block">
-      <div class="s-label">Chọn thú cưng</div>
+      <div class="s-label">Chọn loài thú</div>
       <div class="s-value">
-        <select id="pet-select"><option value="">-- Chọn thú cưng --</option></select>
+        <select id="pet-type">
+          <option value="">-- Chọn loài --</option>
+          <option value="dog">Chó</option>
+          <option value="cat">Mèo</option>
+          <option value="bird">Chim</option>
+          <option value="other">Khác</option>
+        </select>
+      </div>
+    </div>
+    <div class="summary-block">
+      <div class="s-label">Tên thú cưng</div>
+      <div class="s-value">
+        <input type="text" id="pet-name" placeholder="Nhập tên thú cưng">
       </div>
     </div>
     <div class="summary-block">
       <div class="s-label">Thời gian</div>
-      <div class="s-value" id="sum-time">—</div>
+      <div class="s-value" id="sum-time">Chưa chọn</div>
     </div>
     <div class="summary-block">
       <div class="s-label">Phòng khám</div>
       <div class="s-value s-center">
         <img id="sum-center-logo" class="center-logo" alt="logo"/>
-        <span id="sum-center">—</span>
+        <span id="sum-center">Phòng khám</span>
       </div>
-    </div>
-    <div class="summary-block">
-      <div class="s-label">Thú cưng</div>
-      <div class="s-value" id="sum-pet">—</div>
     </div>
     <div class="summary-block">
       <div class="s-label">Dịch vụ</div>
@@ -65,5 +73,4 @@
 </main>
 
 <script src="public/js/booking.js"></script>
-<script src="public/js/booking-override.js"></script>
 <script src="public/js/booking-logo.js"></script>

@@ -215,3 +215,4 @@ class Api_AppointmentsController {
         }
     }
 }
+

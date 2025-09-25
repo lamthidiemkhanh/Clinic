@@ -82,7 +82,7 @@ switch ($page) {
     case 'api.user':
         (new Api_UserController())->handle();
         break;
-    case 'api.animal_species':
+    case 'api.animal_types':
         (new Api_AnimalSpeciesController())->handle();
         break;
     case 'api.animal_breed':

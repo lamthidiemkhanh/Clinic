@@ -6,7 +6,7 @@ class Api_AppointmentsController {
         if ($method === 'GET') { $this->get(); return; }
         if ($method === 'POST') { $this->post(); return; }
         http_response_code(405);
-        echo json_encode(['error' => 'Phương thức không được hỗ trợ']);
+        echo json_encode(['error' => 'Phương thức không được hỗ trợ'], JSON_UNESCAPED_UNICODE);
     }
 
     private function get(): void {
@@ -15,7 +15,7 @@ class Api_AppointmentsController {
             echo json_encode($data, JSON_UNESCAPED_UNICODE);
         } catch (Throwable $e) {
             http_response_code(500);
-            echo json_encode(['error' => $e->getMessage()]);
+            echo json_encode(['error' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
         }
     }
 
@@ -41,7 +41,7 @@ class Api_AppointmentsController {
             if (isset($columns['appointment_date'])) {
                 $recordId = $this->insertLegacySchema($pdo, $data, $date, $time, $petType, $petName);
             } else {
-                $this->ensureTable($pdo, $columns);
+                $this->ensureExtendedSchema($pdo, $columns);
                 $recordId = $this->insertExtendedSchema($pdo, $data, $date, $time, $petType, $petName);
             }
 
@@ -56,15 +56,10 @@ class Api_AppointmentsController {
     }
 
     private function insertLegacySchema(PDO $pdo, array $payload, string $date, string $time, string $petType, string $petName): int {
+        $clinicId = $this->requireClinic($pdo, (int)($payload['center_id'] ?? 0));
+        $serviceId = $this->resolveServiceId($pdo, $payload, $clinicId);
         $animalTypeId = $this->resolveAnimalTypeId($pdo, $petType);
-        $clinicId = $payload['center_id'] ?? null;
-        $serviceId = $payload['service_id'] ?? null;
-        if (!$clinicId) {
-            throw new Exception('Thiếu thông tin phòng khám');
-        }
-        if (!$serviceId) {
-            throw new Exception('Thiếu thông tin dịch vụ');
-        }
+
         $stmt = $pdo->prepare('INSERT INTO appointments (animal_type_id, clinic_id, service_id, pet_name, appointment_date, appointment_time, price, status, created_at, updated_at)
                                VALUES (:animal_type_id, :clinic_id, :service_id, :pet_name, :appointment_date, :appointment_time, :price, :status, NOW(), NOW())');
         $stmt->execute([
@@ -74,23 +69,25 @@ class Api_AppointmentsController {
             ':pet_name' => $petName,
             ':appointment_date' => $date,
             ':appointment_time' => $this->formatTimeForDb($time),
-            ':price' => isset($payload['price']) ? (float)$payload['price'] : null,
+            ':price' => isset($payload['price']) ? (float)$payload['price'] : 0,
             ':status' => 'pending'
         ]);
         return (int)$pdo->lastInsertId();
     }
 
     private function insertExtendedSchema(PDO $pdo, array $payload, string $date, string $time, string $petType, string $petName): int {
-        $centerId = $payload['center_id'] ?? null;
+        $centerId = (int)($payload['center_id'] ?? 0) ?: null;
+        $serviceId = $this->resolveServiceId($pdo, $payload, $centerId);
+
         $stmt = $pdo->prepare('INSERT INTO appointments (clinic_id, center_id, center_name, service_id, service_name, price, date, time, status, pet_type, pet_type_label, pet_name, email, created_at)
                                VALUES (:clinic_id, :center_id, :center_name, :service_id, :service_name, :price, :date, :time, :status, :pet_type, :pet_type_label, :pet_name, :email, NOW())');
         $stmt->execute([
-            ':clinic_id' => $centerId ?: null,
-            ':center_id' => $centerId ?: null,
+            ':clinic_id' => $centerId,
+            ':center_id' => $centerId,
             ':center_name' => $payload['center_name'] ?? null,
-            ':service_id' => $payload['service_id'] ?? null,
+            ':service_id' => $serviceId,
             ':service_name' => $payload['service_name'] ?? null,
-            ':price' => isset($payload['price']) ? (float)$payload['price'] : null,
+            ':price' => isset($payload['price']) ? (float)$payload['price'] : 0,
             ':date' => $date,
             ':time' => $time,
             ':status' => 'pending',
@@ -102,11 +99,7 @@ class Api_AppointmentsController {
         return (int)$pdo->lastInsertId();
     }
 
-    private function ensureTable(PDO $pdo, array $columns): void {
-        if (isset($columns['appointment_date'])) {
-            return; // existing legacy schema, do not alter
-        }
-
+    private function ensureExtendedSchema(PDO $pdo, array $columns): void {
         $pdo->exec('CREATE TABLE IF NOT EXISTS appointments (
             id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             clinic_id INT NULL,
@@ -125,10 +118,7 @@ class Api_AppointmentsController {
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci');
 
-        if (!$columns) {
-            $columns = $this->getColumns($pdo);
-        }
-
+        $columns = $columns ?: $this->getColumns($pdo);
         $alter = [];
         $add = function(string $name, string $definition) use (&$columns, &$alter): void {
             if (!isset($columns[$name])) {
@@ -170,15 +160,102 @@ class Api_AppointmentsController {
         return $time;
     }
 
+    private function requireClinic(PDO $pdo, int $clinicId): int {
+        if ($clinicId <= 0) {
+            throw new Exception('Thiếu thông tin phòng khám');
+        }
+        $stmt = $pdo->prepare('SELECT id FROM clinic_center WHERE id = :id');
+        $stmt->execute([':id' => $clinicId]);
+        if (!$stmt->fetchColumn()) {
+            throw new Exception('Phòng khám không tồn tại');
+        }
+        return $clinicId;
+    }
+
+    private function resolveServiceId(PDO $pdo, array $payload, ?int $clinicId): int {
+        $serviceId = (int)($payload['service_id'] ?? 0);
+        if ($serviceId > 0 && $this->serviceExists($pdo, $serviceId)) {
+            return $serviceId;
+        }
+
+        $serviceName = trim((string)($payload['service_name'] ?? ''));
+        if ($serviceName === '') {
+            throw new Exception('Thiếu thông tin dịch vụ');
+        }
+
+        $existing = $this->findServiceByName($pdo, $serviceName, $clinicId);
+        if ($existing) {
+            return (int)$existing;
+        }
+
+        if (!$clinicId) {
+            $clinicId = $this->requireClinic($pdo, (int)($payload['center_id'] ?? 0));
+        }
+
+        $categoryId = $this->guessCategoryId($pdo, $serviceName);
+        $stmt = $pdo->prepare('INSERT INTO service (name, price, description, center_id, category_service_id, created_at, updated_at)
+                               VALUES (:name, :price, :description, :center_id, :category_service_id, NOW(), NOW())');
+        $stmt->execute([
+            ':name' => $serviceName,
+            ':price' => isset($payload['price']) ? (float)$payload['price'] : 0,
+            ':description' => $payload['service_description'] ?? '',
+            ':center_id' => $clinicId,
+            ':category_service_id' => $categoryId
+        ]);
+        return (int)$pdo->lastInsertId();
+    }
+
+    private function serviceExists(PDO $pdo, int $id): bool {
+        $stmt = $pdo->prepare('SELECT id FROM service WHERE id = :id');
+        $stmt->execute([':id' => $id]);
+        return (bool)$stmt->fetchColumn();
+    }
+
+    private function findServiceByName(PDO $pdo, string $name, ?int $clinicId): ?int {
+        $sql = 'SELECT id FROM service WHERE name LIKE :name';
+        $params = [':name' => $name];
+        if ($clinicId) {
+            $sql .= ' AND center_id = :center_id';
+            $params[':center_id'] = $clinicId;
+        }
+        $sql .= ' ORDER BY id LIMIT 1';
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+        $id = $stmt->fetchColumn();
+        return $id ? (int)$id : null;
+    }
+
+    private function guessCategoryId(PDO $pdo, string $serviceName): int {
+        $map = [
+            'spa' => 1,
+            'groom' => 1,
+            'khám' => 2,
+            'kham' => 2,
+            'tiêm' => 3,
+            'tiem' => 3,
+            'khách sạn' => 4,
+            'khach san' => 4,
+            'phẫu thuật' => 5,
+            'phau thuat' => 5,
+        ];
+        $normalized = strtolower($serviceName);
+        foreach ($map as $needle => $catId) {
+            if (strpos($normalized, $needle) !== false) {
+                return $catId;
+            }
+        }
+        return 6; // Khác
+    }
+
     private function resolveAnimalTypeId(PDO $pdo, string $petType): int {
         $target = $this->normalizeKey($petType);
-        $candidates = [
-            'dog' => ['cho'],
-            'cat' => ['meo'],
-            'bird' => ['chim'],
-            'other' => ['khac']
+        $map = [
+            'dog' => ['cho', 'dog'],
+            'cat' => ['meo', 'cat'],
+            'bird' => ['chim', 'bird'],
+            'other' => ['khac', 'other']
         ];
-        $wanted = $candidates[$target] ?? [];
+        $wanted = $map[$target] ?? [];
         $fallback = null;
         $stmt = $pdo->query('SELECT id, name FROM animal_types');
         foreach ($stmt as $row) {
@@ -194,7 +271,7 @@ class Api_AppointmentsController {
         if ($fallback !== null) {
             return $fallback;
         }
-        throw new Exception('Không tìm thấy loại thú nuôi phù hợp trong bảng animal_types');
+        throw new Exception('Không tìm thấy loại thú nuôi phù hợp');
     }
 
     private function normalizeKey(string $value): string {
@@ -211,7 +288,7 @@ class Api_AppointmentsController {
             $line = json_encode(['ts' => date('c')] + $data, JSON_UNESCAPED_UNICODE);
             file_put_contents(__DIR__ . '/../../../appointments.log', $line . PHP_EOL, FILE_APPEND);
         } catch (Throwable $e) {
-            // bỏ qua lỗi ghi log
+            // ignore logging errors
         }
     }
 }

@@ -1,9 +1,10 @@
-﻿<?php $keyword = htmlspecialchars($pagination['keyword'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
+<?php $keyword = htmlspecialchars($pagination['keyword'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
 <div class="top-logo-bar index-hero"></div>
 <div class="home-search">
-  <form class="search-bar" action="index.php" method="get">
+  <form class="search-bar" data-search-form="1" action="index.php" method="get">
     <input type="hidden" name="page" value="search">
-    <input type="text" name="q" placeholder="Tim kiem dich vu, phong kham..." value="<?= $keyword ?>">
+    <input type="hidden" name="service" value="all">
+    <input type="text" name="q" placeholder="Tìm kiếm dịch vụ, phòng khám..." value="<?= $keyword ?>">
     <button type="submit"><i class="fas fa-search"></i></button>
   </form>
 </div>

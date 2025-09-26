@@ -14,6 +14,37 @@
       .replace(/\s+/g, '-');
   }
 
+  function bindSearchForm(form) {
+    if (!form || form.dataset.searchBound === '1') {
+      return;
+    }
+    form.dataset.searchBound = '1';
+    form.addEventListener('submit', event => {
+      const formData = new FormData(form);
+      const qInput = form.querySelector('input[name="q"]');
+      const serviceInput = form.querySelector('input[name="service"]');
+      let q = (formData.get('q') || '').trim();
+      let service = (formData.get('service') || 'all').trim() || 'all';
+
+      if (qInput) {
+        qInput.value = q;
+      }
+      if (serviceInput) {
+        serviceInput.value = service;
+      }
+
+      const params = new URLSearchParams();
+      params.set('page', 'search');
+      params.set('service', service);
+      if (q !== '') {
+        params.set('q', q);
+      }
+
+      event.preventDefault();
+      window.location.href = `index.php?${params.toString()}`;
+    });
+  }
+
   async function fetchClinics(params = {}) {
     const search = new URLSearchParams({ per_page: params.perPage || 200 });
     if (params.q) search.set('q', params.q);
@@ -46,9 +77,9 @@
         <div class="clinic-info">
           <div class="clinic-name"><a href="index.php?page=clinic-detail&id=${encodeURIComponent(item.id)}">${item.name ?? ''}</a></div>
           <div class="clinic-address">${item.address ?? item.description ?? ''}</div>
-          ${categories ? `<div class="clinic-meta">Danh muc: ${categories}</div>` : ''}
-          ${services ? `<div class="clinic-meta">Dich vu: ${services}</div>` : ''}
-          ${pets ? `<div class="clinic-meta">Thu cung: ${pets}</div>` : ''}
+          ${categories ? `<div class="clinic-meta">Danh mục: ${categories}</div>` : ''}
+          ${services ? `<div class="clinic-meta">Dịch vụ: ${services}</div>` : ''}
+          ${pets ? `<div class="clinic-meta">Thú cưng: ${pets}</div>` : ''}
         </div>
       `;
       container.appendChild(card);
@@ -59,16 +90,24 @@
     const params = new URLSearchParams(location.search);
     const q = params.get('q') || '';
     const service = params.get('service') || 'all';
-    const pet = params.get('pet') || 'all';
 
     const filtered = ALL_CLINICS.filter(item => {
       const nameSlug = slug(item.name || '');
       const serviceSlug = slug(item.service_categories || item.services || '');
-      const petSlug = slug(item.pets || item.pet || '');
-      const matchQ = !q || nameSlug.includes(slug(q));
+      const servicesSlug = slug(item.services || '');
+      const addressSlug = slug(item.address || '');
+      const petsSlug = slug(item.pets || '');
+      const keywordSlug = slug(q);
+
+      const matchKeyword = !q
+        || nameSlug.includes(keywordSlug)
+        || serviceSlug.includes(keywordSlug)
+        || servicesSlug.includes(keywordSlug)
+        || addressSlug.includes(keywordSlug)
+        || petsSlug.includes(keywordSlug);
+
       const matchService = service === 'all' || serviceSlug.includes(service);
-      const matchPet = pet === 'all' || petSlug.includes(pet);
-      return matchQ && matchService && matchPet;
+      return matchKeyword && matchService;
     });
 
     const container = document.getElementById('clinic-list');
@@ -76,50 +115,32 @@
   }
 
   function setupSearchPage() {
-    const container = document.getElementById('clinic-list');
+    const container = document.getElementById('clinic-search-page');
     if (!container) return;
 
     const params = new URLSearchParams(location.search);
     const q = params.get('q') || '';
-    const input = document.querySelector('.search-bar input[name="q"]');
-    if (input) {
-      input.value = q;
-    }
+    const listContainer = document.getElementById('clinic-list');
 
-    if (container.dataset.server === '1') {
+    if (listContainer && listContainer.dataset.server === '1') {
+      const input = container.querySelector('.search-bar input[name="q"]');
       if (input) {
-        const form = input.closest('form');
-        if (form) {
-          form.addEventListener('submit', () => {
-            input.value = input.value.trim();
-          });
-        }
+        input.value = q;
       }
       return;
     }
 
-    if (input) {
-      input.addEventListener('keypress', e => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          params.set('q', input.value.trim());
-          location.search = params.toString();
-        }
-      });
-    }
-
-    $all('.chip').forEach(chip => {
-      chip.addEventListener('click', () => {
-        if (chip.dataset.service) params.set('service', chip.dataset.service);
-        if (chip.dataset.pet) params.set('pet', chip.dataset.pet);
-        history.replaceState(null, '', `${location.pathname}?${params.toString()}`);
-        applySearchFilters();
-      });
-    });
-
     fetchClinics({ q }).then(data => {
       ALL_CLINICS = data;
       applySearchFilters();
+    });
+
+    $all('.chip[data-service]').forEach(chip => {
+      chip.addEventListener('click', () => {
+        params.set('service', chip.dataset.service);
+        history.replaceState(null, '', `${location.pathname}?${params.toString()}`);
+        applySearchFilters();
+      });
     });
   }
 
@@ -135,6 +156,8 @@
   }
 
   window.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('form[data-search-form="1"]').forEach(bindSearchForm);
+
     if (document.getElementById('clinic-search-page')) {
       setupSearchPage();
     } else {

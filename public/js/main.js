@@ -1,4 +1,4 @@
-﻿(() => {
+(() => {
   const $ = (sel, root = document) => root.querySelector(sel);
   const $all = (sel, root = document) => Array.from(root.querySelectorAll(sel));
   let ALL_CLINICS = [];
@@ -38,12 +38,17 @@
       const card = document.createElement('div');
       card.className = 'clinic-card';
       const logo = item.logo || item.image || item.image_url || item.avatar || 'public/img/clinic-center.png';
+      const categories = item.service_categories || '';
+      const services = item.services || '';
+      const pets = item.pets || '';
       card.innerHTML = `
         <div class="clinic-logo"><img src="${logo}" alt="Logo" style="width:32px;height:32px;object-fit:contain;"></div>
         <div class="clinic-info">
           <div class="clinic-name"><a href="index.php?page=clinic-detail&id=${encodeURIComponent(item.id)}">${item.name ?? ''}</a></div>
           <div class="clinic-address">${item.address ?? item.description ?? ''}</div>
-          ${item.services ? `<div class="clinic-meta">Dịch vụ: ${item.services}</div>` : ''}
+          ${categories ? `<div class="clinic-meta">Danh muc: ${categories}</div>` : ''}
+          ${services ? `<div class="clinic-meta">Dich vu: ${services}</div>` : ''}
+          ${pets ? `<div class="clinic-meta">Thu cung: ${pets}</div>` : ''}
         </div>
       `;
       container.appendChild(card);
@@ -56,9 +61,9 @@
     const service = params.get('service') || 'all';
     const pet = params.get('pet') || 'all';
 
-    let filtered = ALL_CLINICS.filter(item => {
+    const filtered = ALL_CLINICS.filter(item => {
       const nameSlug = slug(item.name || '');
-      const serviceSlug = slug(item.services || item.service_category || '');
+      const serviceSlug = slug(item.service_categories || item.services || '');
       const petSlug = slug(item.pets || item.pet || '');
       const matchQ = !q || nameSlug.includes(slug(q));
       const matchService = service === 'all' || serviceSlug.includes(service);
@@ -76,9 +81,24 @@
 
     const params = new URLSearchParams(location.search);
     const q = params.get('q') || '';
-    const input = document.querySelector('.search-bar input');
+    const input = document.querySelector('.search-bar input[name="q"]');
     if (input) {
       input.value = q;
+    }
+
+    if (container.dataset.server === '1') {
+      if (input) {
+        const form = input.closest('form');
+        if (form) {
+          form.addEventListener('submit', () => {
+            input.value = input.value.trim();
+          });
+        }
+      }
+      return;
+    }
+
+    if (input) {
       input.addEventListener('keypress', e => {
         if (e.key === 'Enter') {
           e.preventDefault();
@@ -106,7 +126,7 @@
   function setupHomePage() {
     const container = document.getElementById('clinic-list');
     if (!container || container.dataset.server === '1') {
-      return; // server-rendered; pagination handled on backend
+      return;
     }
     fetchClinics().then(data => {
       ALL_CLINICS = data;

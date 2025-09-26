@@ -2,8 +2,8 @@
 <div class="top-logo-bar index-hero"></div>
 <div class="home-search">
   <form class="search-bar" action="index.php" method="get">
-    <input type="hidden" name="page" value="home">
-    <input type="text" name="q" placeholder="Tìm kiếm dịch vụ, phòng khám..." value="<?= $keyword ?>">
+    <input type="hidden" name="page" value="search">
+    <input type="text" name="q" placeholder="Tim kiem dich vu, phong kham..." value="<?= $keyword ?>">
     <button type="submit"><i class="fas fa-search"></i></button>
   </form>
 </div>

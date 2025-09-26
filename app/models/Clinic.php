@@ -70,10 +70,12 @@ class Clinic extends Model
                 c.name,
                 c.description,
                 c.address,
+                GROUP_CONCAT(DISTINCT cat.name ORDER BY cat.name SEPARATOR ', ') AS service_categories,
                 GROUP_CONCAT(DISTINCT cs.name ORDER BY cs.name SEPARATOR ', ') AS services,
                 GROUP_CONCAT(DISTINCT at.name ORDER BY at.name SEPARATOR ', ') AS pets
             FROM clinic_center c
             LEFT JOIN service cs ON cs.center_id = c.id AND cs.deleted_at IS NULL
+            LEFT JOIN category_service cat ON cat.id = cs.category_service_id AND cat.deleted_at IS NULL
             LEFT JOIN clinic_animal ca ON ca.clinic_id = c.id
             LEFT JOIN animal_types at ON at.id = ca.animal_type_id
             {$where}

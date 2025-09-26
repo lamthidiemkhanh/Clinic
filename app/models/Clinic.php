@@ -13,6 +13,38 @@ class Clinic extends Model
         return $this->paginate(1, $limit, $q)['data'];
     }
 
+    public function find(int $id): ?array
+    {
+        $sql = "
+            SELECT
+                c.id,
+                c.name,
+                c.description,
+                c.address,
+                c.phone,
+                c.email,
+                c.is_verify,
+                COUNT(DISTINCT s.id) AS service_count,
+                GROUP_CONCAT(DISTINCT s.name ORDER BY s.name SEPARATOR ', ') AS services,
+                GROUP_CONCAT(DISTINCT at.name ORDER BY at.name SEPARATOR ', ') AS pets
+            FROM clinic_center c
+            LEFT JOIN service s ON s.center_id = c.id AND s.deleted_at IS NULL
+            LEFT JOIN clinic_animal ca ON ca.clinic_id = c.id
+            LEFT JOIN animal_types at ON at.id = ca.animal_type_id
+            WHERE c.id = :id AND c.deleted_at IS NULL
+            GROUP BY c.id
+            LIMIT 1
+        ";
+        $st = $this->db->prepare($sql);
+        $st->execute([':id' => $id]);
+        $row = $st->fetch(PDO::FETCH_ASSOC);
+        if ($row === false) {
+            return null;
+        }
+        $row['service_count'] = (int)($row['service_count'] ?? 0);
+        return $row;
+    }
+
     public function paginate(int $page = 1, int $perPage = 10, string $keyword = ''): array
     {
         $page = max(1, (int)$page);
@@ -70,3 +102,4 @@ class Clinic extends Model
         ];
     }
 }
+

@@ -33,6 +33,23 @@
   window.notifyNewComment = function(data){
     pushNotif({ type:'comment', title:'Có bình luận mới', icon:'comments', payload:data||{} });
   };
+  window.notifyBookingSuccess = function(data){
+    var payload = data || {};
+    if (!payload.subject){
+      payload.subject = payload.service_name || 'Dịch vụ';
+    }
+    if (!payload.text){
+      var parts = [];
+      if (payload.center_name) parts.push(payload.center_name);
+      if (payload.time_label) {
+        parts.push(payload.time_label);
+      } else if (payload.time || payload.date) {
+        parts.push([payload.time, payload.date].filter(Boolean).join(', '));
+      }
+      payload.text = 'Đặt lịch thành công' + (parts.length ? ' - ' + parts.join(' - ') : '');
+    }
+    pushNotif({ type:'booking', title:'Đặt lịch thành công', icon:'calendar-check', payload:payload });
+  };
   document.addEventListener('DOMContentLoaded', function(){
     var items = document.querySelectorAll('.footer-menu .footer-item');
     if (!items || !items.length) return;
@@ -50,4 +67,3 @@
     }
   });
 })();
-

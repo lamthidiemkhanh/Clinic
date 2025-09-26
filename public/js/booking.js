@@ -160,6 +160,25 @@
         messageBox.textContent = data.message || "Đặt lịch thành công";
         messageBox.className = "bk-message success";
       }
+      const timeLabel = (state.time && state.date) ? `${state.time}, ${formatDate(state.date)}` : (state.time || (state.date ? formatDate(state.date) : ""));
+      if (typeof window.notifyBookingSuccess === "function") {
+        window.notifyBookingSuccess({
+          center_id: state.centerId,
+          center_name: state.centerName,
+          service_id: state.serviceId,
+          service_name: state.serviceName,
+          date: state.date,
+          time: state.time,
+          time_label: timeLabel || undefined,
+          price: state.price,
+          pet_name: payload.pet_name,
+          pet_type: payload.pet_type,
+          pet_type_label: payload.pet_type_label,
+          appointment_id: data && data.appointment_id ? data.appointment_id : undefined,
+          subject: state.serviceName || undefined,
+          text: data && data.message ? data.message : undefined
+        });
+      }
     } catch (err){
       if (messageBox){
         messageBox.textContent = err.message || "Có lỗi xảy ra khi đặt lịch";

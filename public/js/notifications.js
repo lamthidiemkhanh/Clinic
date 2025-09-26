@@ -9,6 +9,7 @@
     var card = el('article','notif-card info');
     if (n.type==='review') card.className = 'notif-card info';
     else if (n.type==='comment') card.className = 'notif-card info';
+    else if (n.type==='booking') card.className = 'notif-card success';
     else if (n.type==='success') card.className = 'notif-card success';
     else if (n.type==='cancelled') card.className = 'notif-card cancelled';
     var head = el('div','notif-head'); head.textContent = n.title || 'Thông báo';
@@ -17,9 +18,26 @@
     var content = el('div','notif-content');
     var title = el('div','notif-title'); title.textContent = (n.payload && (n.payload.subject || n.payload.user)) || 'Chi tiết';
     var sub = el('div','notif-sub');
-    if (n.type==='review') sub.textContent = (n.payload.rating?`Đánh giá ${n.payload.rating}/5`: 'Đánh giá mới') + (n.payload.clinic?` • ${n.payload.clinic}`:'');
+    if (n.type==='review') sub.textContent = (n.payload.rating?`Đánh giá ${n.payload.rating}/5`:'Đánh giá mới') + (n.payload.clinic?` - ${n.payload.clinic}`:'');
     else if (n.type==='comment') sub.textContent = (n.payload.post?`Bài: ${n.payload.post}`:'Bình luận mới');
-    else sub.textContent = n.payload && n.payload.text || '';
+    else if (n.type==='booking') {
+      var parts = [];
+      if (n.payload && n.payload.center_name) parts.push(n.payload.center_name);
+      var timeDetail = '';
+      if (n.payload && n.payload.time_label) timeDetail = n.payload.time_label;
+      else if (n.payload && (n.payload.time || n.payload.date)) {
+        var rawTime = [];
+        if (n.payload.time) rawTime.push(n.payload.time);
+        if (n.payload.date) rawTime.push(n.payload.date);
+        timeDetail = rawTime.join(', ');
+      }
+      if (timeDetail) parts.push(timeDetail);
+      var fallback = 'Đặt lịch thành công';
+      var text = (n.payload && n.payload.text) || parts.join(' - ') || fallback;
+      sub.textContent = text;
+    } else {
+      sub.textContent = (n.payload && n.payload.text) || '';
+    }
     content.appendChild(title); content.appendChild(sub);
     body.appendChild(ic); body.appendChild(content);
     card.appendChild(head); card.appendChild(body);
@@ -45,5 +63,3 @@
   }
   document.addEventListener('DOMContentLoaded', render);
 })();
-
-

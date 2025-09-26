@@ -48,7 +48,7 @@ class Clinic extends Model
     public function paginate(int $page = 1, int $perPage = 10, string $keyword = '', array $filters = []): array
     {
         $page = max(1, (int)$page);
-        $perPage = max(1, min(50, (int)$perPage));
+        $perPage = max(1, min(1000, (int)$perPage));
         $offset = ($page - 1) * $perPage;
         $keyword = trim($keyword);
 

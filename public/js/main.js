@@ -3,7 +3,16 @@
   const $all = (sel, root = document) => Array.from(root.querySelectorAll(sel));
   let ALL_CLINICS = [];
 
-  function slug(str = "") {
+  const SERVICE_KEYWORDS = {
+    'kham-benh': ['khám', 'kham', 'bệnh', 'benh', 'khám bệnh', 'kham benh'],
+    'tiem-phong': ['tiêm', 'tiem', 'phòng', 'phong', 'vaccine', 'chích', 'tiêm phòng', 'tiem phong'],
+    'spa': ['spa', 'groom', 'grooming'],
+    'khach-san': ['khách sạn', 'khach san', 'lưu trú', 'luu tru', 'hotel'],
+    'phau-thuat': ['phẫu thuật', 'phau thuat', 'surgery', 'phẫu'],
+    'khac': ['khác', 'khac'],
+  };
+
+  function slug(str = '') {
     return str
       .toString()
       .normalize('NFD')
@@ -12,6 +21,71 @@
       .replace(/[^a-z0-9\s-]/g, '')
       .trim()
       .replace(/\s+/g, '-');
+  }
+
+  function tokenize(text = '') {
+    const trimmed = text.trim();
+    if (!trimmed) return [];
+    const normalized = trimmed
+      .toLowerCase()
+      .replace(/[\s,;]+/g, ' ')
+      .trim();
+    if (!normalized) return [];
+    const parts = normalized.split(' ').filter(Boolean);
+    const tokens = [];
+    parts.forEach(part => {
+      tokens.push(part);
+      const slugPart = slug(part);
+      if (slugPart && slugPart !== part) {
+        tokens.push(slugPart);
+      }
+    });
+    return Array.from(new Set(tokens));
+  }
+
+  function collectCandidates(item = {}) {
+    const fields = [
+      item.name,
+      item.description,
+      item.address,
+      item.service_categories,
+      item.services,
+      item.pets,
+    ];
+    return fields
+      .filter(value => typeof value === 'string' && value.trim() !== '')
+      .map(value => {
+        const lower = value.toLowerCase();
+        return [lower, slug(value)];
+      });
+  }
+
+  function containsAllTokens(candidates, tokens) {
+    return tokens.every(token => {
+      return candidates.some(([lower, slugValue]) => {
+        if (lower && lower.includes(token)) return true;
+        if (slugValue && slugValue.includes(token)) return true;
+        return false;
+      });
+    });
+  }
+
+  function serviceSlugList(service) {
+    if (service === 'all') return [];
+    const base = [slug(service)].filter(Boolean);
+    const keywords = SERVICE_KEYWORDS[service] || [];
+    const aliasSlugs = keywords
+      .map(v => slug(v))
+      .filter(Boolean);
+    return Array.from(new Set([...base, ...aliasSlugs]));
+  }
+
+  function matchesService(candidates, serviceSlugs) {
+    if (serviceSlugs.length === 0) return true;
+    return candidates.some(([, slugValue]) => {
+      if (!slugValue) return false;
+      return serviceSlugs.some(needle => slugValue.includes(needle));
+    });
   }
 
   function bindSearchForm(form) {
@@ -25,6 +99,10 @@
       const serviceInput = form.querySelector('input[name="service"]');
       let q = (formData.get('q') || '').trim();
       let service = (formData.get('service') || 'all').trim() || 'all';
+
+      if (q !== '') {
+        service = 'all';
+      }
 
       if (qInput) {
         qInput.value = q;
@@ -89,25 +167,14 @@
   function applySearchFilters() {
     const params = new URLSearchParams(location.search);
     const q = params.get('q') || '';
-    const service = params.get('service') || 'all';
+    const service = (params.get('service') || 'all').trim() || 'all';
+
+    const tokenList = tokenize(q);
+    const serviceSlugs = serviceSlugList(service);
 
     const filtered = ALL_CLINICS.filter(item => {
-      const nameSlug = slug(item.name || '');
-      const serviceSlug = slug(item.service_categories || item.services || '');
-      const servicesSlug = slug(item.services || '');
-      const addressSlug = slug(item.address || '');
-      const petsSlug = slug(item.pets || '');
-      const keywordSlug = slug(q);
-
-      const matchKeyword = !q
-        || nameSlug.includes(keywordSlug)
-        || serviceSlug.includes(keywordSlug)
-        || servicesSlug.includes(keywordSlug)
-        || addressSlug.includes(keywordSlug)
-        || petsSlug.includes(keywordSlug);
-
-      const matchService = service === 'all' || serviceSlug.includes(service);
-      return matchKeyword && matchService;
+      const candidates = collectCandidates(item);
+      return containsAllTokens(candidates, tokenList) && matchesService(candidates, serviceSlugs);
     });
 
     const container = document.getElementById('clinic-list');
@@ -121,13 +188,17 @@
     const params = new URLSearchParams(location.search);
     const q = params.get('q') || '';
     const listContainer = document.getElementById('clinic-list');
+    const input = container.querySelector('.search-bar input[name="q"]');
 
     if (listContainer && listContainer.dataset.server === '1') {
-      const input = container.querySelector('.search-bar input[name="q"]');
       if (input) {
         input.value = q;
       }
       return;
+    }
+
+    if (input) {
+      input.value = q;
     }
 
     fetchClinics({ q }).then(data => {
@@ -138,6 +209,10 @@
     $all('.chip[data-service]').forEach(chip => {
       chip.addEventListener('click', () => {
         params.set('service', chip.dataset.service);
+        params.delete('q');
+        if (input) {
+          input.value = '';
+        }
         history.replaceState(null, '', `${location.pathname}?${params.toString()}`);
         applySearchFilters();
       });

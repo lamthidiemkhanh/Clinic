@@ -3,12 +3,9 @@
   $service = $service ?? 'all';
   $serviceOptions = $serviceOptions ?? [];
   $resultsCount = $resultsCount ?? 0;
-  $buildUrl = function(array $overrides = []) use ($q, $service) {
+  $buildUrl = function(array $overrides = []) use ($service) {
       $params = ['page' => 'search'];
       $params['service'] = $overrides['service'] ?? $service;
-      if ($q !== '') {
-          $params['q'] = $q;
-      }
       return 'index.php?' . http_build_query($params);
   };
 ?>

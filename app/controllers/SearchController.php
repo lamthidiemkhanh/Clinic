@@ -6,7 +6,12 @@ class SearchController {
             $q = '';
         }
 
-        $serviceFilter = $this->normaliseService($_GET['service'] ?? 'all');
+        $rawService = $_GET['service'] ?? 'all';
+        $serviceFilter = $this->normaliseService($rawService);
+        if ($serviceFilter !== 'all' && isset($_GET['service'])) {
+            $q = '';
+        }
+
         $limit = max(1, min(200, (int)($_GET['per_page'] ?? 100)));
 
         $filters = [
@@ -15,9 +20,11 @@ class SearchController {
         ];
 
         $clinics = [];
+        $perPage = $q === '' ? $limit : max($limit, 1000);
+
         try {
             $mdl = new Clinic();
-            $result = $mdl->paginate(1, $limit, $q, $filters);
+            $result = $mdl->paginate(1, $perPage, '', $filters);
             $clinics = $result['data'];
         } catch (Throwable $e) {
             $clinics = [];
@@ -36,43 +43,43 @@ class SearchController {
             'resultsCount' => $resultsCount,
             'pagination' => [
                 'page' => 1,
-                'perPage' => $limit,
+                'perPage' => $perPage,
                 'total' => $resultsCount,
-                'pages' => 1,
+                'pages' => $resultsCount > 0 ? 1 : 0,
+                'keyword' => $q,
             ],
         ]);
     }
 
     private function filterClinics(array $clinics, string $keyword, string $service): array
     {
-        $keywordLower = mb_strtolower($keyword, 'UTF-8');
-        $keywordSlug = $this->slugify($keyword);
+        $tokens = $this->tokenize($keyword);
 
         $serviceSlugs = [];
         if ($service !== 'all') {
-            $serviceSlugs[] = $service;
-            $serviceSlugs = array_merge($serviceSlugs, $this->serviceKeywords()[$service] ?? []);
-            $serviceSlugs = array_values(array_unique(array_map([$this, 'slugify'], $serviceSlugs)));
+            $serviceSlugs[] = $this->slugify($service);
+            foreach ($this->serviceKeywords()[$service] ?? [] as $alias) {
+                $slug = $this->slugify($alias);
+                if ($slug !== '') {
+                    $serviceSlugs[] = $slug;
+                }
+            }
+            $serviceSlugs = array_values(array_unique(array_filter($serviceSlugs)));
         }
 
         $filtered = [];
         foreach ($clinics as $clinic) {
             $candidates = $this->collectSearchableValues($clinic);
-            $matchesKeyword = $keywordLower === '' && $keywordSlug === ''
-                ? true
-                : $this->matchesKeyword($candidates, $keywordLower, $keywordSlug);
 
-            if (!$matchesKeyword) {
+            if (!empty($tokens) && !$this->containsAllTokens($candidates, $tokens)) {
                 continue;
             }
 
-            $matchesService = empty($serviceSlugs)
-                ? true
-                : $this->matchesAnyService($candidates, $serviceSlugs);
-
-            if ($matchesService) {
-                $filtered[] = $clinic;
+            if (!empty($serviceSlugs) && !$this->matchesAnyService($candidates, $serviceSlugs)) {
+                continue;
             }
+
+            $filtered[] = $clinic;
         }
 
         return $filtered;
@@ -101,17 +108,25 @@ class SearchController {
         return $values;
     }
 
-    private function matchesKeyword(array $candidates, string $keywordLower, string $keywordSlug): bool
+    private function containsAllTokens(array $candidates, array $tokens): bool
     {
-        foreach ($candidates as [$lower, $slug]) {
-            if ($keywordLower !== '' && mb_strpos($lower, $keywordLower) !== false) {
-                return true;
+        foreach ($tokens as $token) {
+            $matched = false;
+            foreach ($candidates as [$lower, $slug]) {
+                if ($lower !== '' && mb_strpos($lower, $token, 0, 'UTF-8') !== false) {
+                    $matched = true;
+                    break;
+                }
+                if ($slug !== '' && strpos($slug, $token) !== false) {
+                    $matched = true;
+                    break;
+                }
             }
-            if ($keywordSlug !== '' && $slug !== '' && strpos($slug, $keywordSlug) !== false) {
-                return true;
+            if (!$matched) {
+                return false;
             }
         }
-        return false;
+        return true;
     }
 
     private function matchesAnyService(array $candidates, array $serviceSlugs): bool
@@ -127,6 +142,32 @@ class SearchController {
             }
         }
         return false;
+    }
+
+    private function tokenize(string $keyword): array
+    {
+        $keyword = trim($keyword);
+        if ($keyword === '') {
+            return [];
+        }
+
+        $normalized = mb_strtolower($keyword, 'UTF-8');
+        $normalized = preg_replace('/[\s,;]+/u', ' ', $normalized) ?? '';
+        $parts = preg_split('/\s+/u', trim($normalized)) ?: [];
+
+        $tokens = [];
+        foreach ($parts as $part) {
+            if ($part === '') {
+                continue;
+            }
+            $tokens[] = $part;
+            $slug = $this->slugify($part);
+            if ($slug !== '' && $slug !== $part) {
+                $tokens[] = $slug;
+            }
+        }
+
+        return array_values(array_unique($tokens));
     }
 
     private function normaliseService($value): string

@@ -1,12 +1,12 @@
 ﻿<?php $keyword = htmlspecialchars($pagination['keyword'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
-<div class="top-logo-bar index-hero"></div>
-<div class="home-search">
+<header class="header home-header">
+  <div class="logo"><img src="public/img/clinic-center.png" alt="Clinic Logo" height="48"></div>
   <form class="search-bar" action="index.php" method="get">
     <input type="hidden" name="page" value="home">
     <input type="text" name="q" placeholder="Tìm kiếm dịch vụ, phòng khám..." value="<?= $keyword ?>">
-    <button type="submit"><i class="fas fa-search"></i></button>
+    <button type="submit" title="Tìm kiếm"><i class="fas fa-search"></i></button>
   </form>
-</div>
+</header>
 <script src="public/js/main.js?v=10"></script>
 
 <section class="services">

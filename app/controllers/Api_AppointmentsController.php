@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 class Api_AppointmentsController {
     public function handle(): void {
         header('Content-Type: application/json; charset=utf-8');
@@ -248,14 +248,14 @@ class Api_AppointmentsController {
     }
 
     private function resolveAnimalTypeId(PDO $pdo, string $petType): int {
-        $target = $this->normalizeKey($petType);
-        $map = [
-            'dog' => ['cho', 'dog'],
-            'cat' => ['meo', 'cat'],
-            'bird' => ['chim', 'bird'],
-            'other' => ['khac', 'other']
+        $requested = $this->normalizeKey($petType);
+        $synonymGroups = [
+            'dog' => ['dog', 'cho', 'cun', 'corgi'],
+            'cat' => ['cat', 'meo', 'miu', 'miaow'],
+            'bird' => ['bird', 'chim', 'vet'],
+            'other' => ['other', 'khac']
         ];
-        $wanted = $map[$target] ?? [];
+        $lookup = [];
         $fallback = null;
         $stmt = $pdo->query('SELECT id, name FROM animal_types');
         foreach ($stmt as $row) {
@@ -263,9 +263,26 @@ class Api_AppointmentsController {
             if ($fallback === null) {
                 $fallback = $id;
             }
-            $normalized = $this->normalizeKey($row['name'] ?? '');
-            if ($wanted && in_array($normalized, $wanted, true)) {
-                return $id;
+            $nameKey = $this->normalizeKey($row['name'] ?? '');
+            if ($nameKey === '') {
+                continue;
+            }
+            $lookup[$nameKey] = $id;
+            foreach ($synonymGroups as $aliases) {
+                if (in_array($nameKey, $aliases, true)) {
+                    foreach ($aliases as $alias) {
+                        $lookup[$alias] = $id;
+                    }
+                    break;
+                }
+            }
+        }
+        if (isset($lookup[$requested])) {
+            return $lookup[$requested];
+        }
+        foreach ($synonymGroups[$requested] ?? [] as $alias) {
+            if (isset($lookup[$alias])) {
+                return $lookup[$alias];
             }
         }
         if ($fallback !== null) {
@@ -273,16 +290,29 @@ class Api_AppointmentsController {
         }
         throw new Exception('Không tìm thấy loại thú nuôi phù hợp');
     }
-
     private function normalizeKey(string $value): string {
-        $transformed = @iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $value);
-        if ($transformed === false) {
-            $transformed = $value;
+        $value = trim($value);
+        if ($value === '') {
+            return '';
         }
-        $transformed = strtolower(preg_replace('/[^a-z]/', '', $transformed));
-        return $transformed;
+        if (function_exists('mb_strtolower')) {
+            $value = mb_strtolower($value, 'UTF-8');
+        } else {
+            $value = strtolower($value);
+        }
+        $map = [
+            'á' => 'a','à' => 'a','ả' => 'a','ã' => 'a','ạ' => 'a','ă' => 'a','ắ' => 'a','ằ' => 'a','ẳ' => 'a','ẵ' => 'a','ặ' => 'a','â' => 'a','ấ' => 'a','ầ' => 'a','ẩ' => 'a','ẫ' => 'a','ậ' => 'a',
+            'é' => 'e','è' => 'e','ẻ' => 'e','ẽ' => 'e','ẹ' => 'e','ê' => 'e','ế' => 'e','ề' => 'e','ể' => 'e','ễ' => 'e','ệ' => 'e',
+            'í' => 'i','ì' => 'i','ỉ' => 'i','ĩ' => 'i','ị' => 'i',
+            'ó' => 'o','ò' => 'o','ỏ' => 'o','õ' => 'o','ọ' => 'o','ô' => 'o','ố' => 'o','ồ' => 'o','ổ' => 'o','ỗ' => 'o','ộ' => 'o','ơ' => 'o','ớ' => 'o','ờ' => 'o','ở' => 'o','ỡ' => 'o','ợ' => 'o',
+            'ú' => 'u','ù' => 'u','ủ' => 'u','ũ' => 'u','ụ' => 'u','ư' => 'u','ứ' => 'u','ừ' => 'u','ử' => 'u','ữ' => 'u','ự' => 'u',
+            'ý' => 'y','ỳ' => 'y','ỷ' => 'y','ỹ' => 'y','ỵ' => 'y',
+            'đ' => 'd'
+        ];
+        $value = strtr($value, $map);
+        $value = preg_replace('/[^a-z0-9]/', '', $value);
+        return $value;
     }
-
     private function logBooking(array $data): void {
         try {
             $line = json_encode(['ts' => date('c')] + $data, JSON_UNESCAPED_UNICODE);

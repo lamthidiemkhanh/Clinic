@@ -37,11 +37,36 @@
       </div>
     </div>
     <div class="summary-block">
+      <div class="s-label">Tên chủ sở hữu</div>
+      <div class="s-value">
+        <input type="text" id="owner-name" placeholder="Nhập tên chủ sở hữu">
+      </div>
+    </div>
+    <div class="summary-block">
       <div class="s-label">Tên thú cưng</div>
       <div class="s-value">
         <input type="text" id="pet-name" placeholder="Nhập tên thú cưng">
       </div>
     </div>
+    <div class="summary-block">
+      <div class="s-label">Màu sắc</div>
+      <div class="s-value">
+        <input type="text" id="pet-color" placeholder="Ví dụ: Trắng đen">
+      </div>
+    </div>
+    <div class="summary-block">
+      <div class="s-label">Trọng lượng (g)</div>
+      <div class="s-value">
+        <input type="number" id="pet-weight" min="0" step="1" placeholder="Ví dụ: 600">
+      </div>
+    </div>
+    <div class="summary-block">
+      <div class="s-label">Ngày sinh</div>
+      <div class="s-value">
+        <input type="date" id="pet-birth">
+      </div>
+    </div>
+
     <div class="summary-block">
       <div class="s-label">Thời gian</div>
       <div class="s-value" id="sum-time">Chưa chọn</div>

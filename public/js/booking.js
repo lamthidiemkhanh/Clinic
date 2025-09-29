@@ -1,4 +1,4 @@
-﻿(function(){
+(function(){
   "use strict";
 
   function $(selector, root){ return (root || document).querySelector(selector); }
@@ -20,10 +20,9 @@
   }
 
   const petTypeLabels = {
-    dog: "Chó",
-    cat: "Mèo",
-    bird: "Chim",
-    other: "Khác"
+    dog: 'Chó',
+    cat: 'Mèo',
+    other: 'Khác'
   };
 
   function money(n){

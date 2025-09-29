@@ -252,8 +252,7 @@ class Api_AppointmentsController {
         $synonymGroups = [
             'dog' => ['dog', 'cho', 'cun', 'corgi'],
             'cat' => ['cat', 'meo', 'miu', 'miaow'],
-            'bird' => ['bird', 'chim', 'vet'],
-            'other' => ['other', 'khac']
+            'other' => ['other', 'khac', 'bird', 'chim', 'vet']
         ];
         $lookup = [];
         $fallback = null;

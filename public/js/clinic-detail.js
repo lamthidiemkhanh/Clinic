@@ -9,6 +9,34 @@
   async function fetchJSON(url){ const res = await fetch(url); if(!res.ok) throw new Error('Fetch error: '+url); return res.json(); }
 
   let CLINIC_DATA = null;
+  const DEFAULT_SERVICE_ICON = 'public/img/services/default.svg';
+  const SERVICE_ICON_RULES = [
+    { keywords: ['groom', 'tia long', 'cat tia', 'cat long', 'tam rua'], icon: 'public/img/services/grooming.svg' },
+    { keywords: ['spa', 'thu gian', 'massage'], icon: 'public/img/services/spa.svg' },
+    { keywords: ['kham', 'bac si', 'medical', 'benh', 'chuan doan'], icon: 'public/img/services/medical.svg' },
+    { keywords: ['tiem', 'vac', 'vaccine', 'tiem phong'], icon: 'public/img/services/vaccine.svg' },
+    { keywords: ['khach san', 'boarding', 'luu tru', 'hotel', 'luu giu'], icon: 'public/img/services/hotel.svg' },
+    { keywords: ['phau', 'surgery', 'mo', 'phau thuat'], icon: 'public/img/services/surgery.svg' }
+  ];
+
+  function normalizeText(value){
+    const str = (value || '').toString().toLowerCase();
+    return typeof str.normalize === 'function'
+      ? str.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      : str;
+  }
+
+  function resolveServiceIcon(service, categoryName){
+    const direct = service.image || service.icon || service.thumbnail || service.image_url || service.photo;
+    if (direct) return direct;
+    const haystack = normalizeText(`${service.name || ''} ${categoryName || ''}`);
+    for (const rule of SERVICE_ICON_RULES){
+      if (rule.keywords.some(keyword => haystack.includes(keyword))){
+        return rule.icon;
+      }
+    }
+    return DEFAULT_SERVICE_ICON;
+  }
 
   function normalizeClinicPayload(payload){
     if (!payload) return {};
@@ -42,6 +70,11 @@
   function renderServices(services, categories){
     const container = $('#service-groups'); container.innerHTML = '';
     const cats = Array.isArray(categories) && categories.length ? categories.slice() : [{id:'khac', name:'Dịch vụ'}];
+    const categoryLookup = { khac: 'Dịch vụ' };
+    cats.forEach(function(cat){
+      const cid = (cat.id ?? 'khac').toString();
+      categoryLookup[cid] = cat.name || categoryLookup[cid] || '';
+    });
     // Map services with null category to 'khac'
     const itemsByCat = services.reduce((acc, s)=>{
       const key = (s.category_service_id ?? 'khac').toString();
@@ -60,11 +93,15 @@
       const list = $el('div', 'service-list');
       listItems.forEach(s => {
         const row = $el('div', 'service-item');
-        const icon = $el('div', 's-icon'); icon.innerHTML = '<i class="far fa-image"></i>';
+        const icon = $el('div', 's-icon');
+        const categoryName = categoryLookup[(s.category_service_id ?? 'khac').toString()] || '';
+        const iconImg = $el('img', 's-icon-img'); iconImg.src = resolveServiceIcon(s, categoryName);
+        iconImg.alt = s.name || categoryName || 'Dịch vụ';
+        icon.appendChild(iconImg);
         const name = $el('div', 's-name'); name.textContent = s.name || 'Dịch vụ';
         const price = $el('div', 's-price'); price.textContent = s.price ? Number(s.price).toLocaleString('vi-VN')+ ' đ' : '';
         const desc = $el('div', 's-desc'); desc.textContent = s.description || '';
-        const action = $el('div');
+        const action = $el('div', 's-action');
         const btn = $el('button', 'btn-book'); btn.textContent = 'Đặt lịch';
         btn.addEventListener('click', (e)=>{
           e.stopPropagation();

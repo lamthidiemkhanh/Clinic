@@ -188,13 +188,18 @@ body {
 #clinic-detail-page .service-group { margin-bottom:12px; }
 #clinic-detail-page .service-group h3 { margin:8px 0; font-size:16px; color:#333; }
 #clinic-detail-page .service-list { display:flex; flex-direction:column; gap:10px; }
-    #clinic-detail-page .service-item { display:grid; grid-template-columns: 36px 1fr auto; gap:10px; background:#f7faff; border:1px solid #dfe8f7; border-radius:10px; padding:10px; align-items:center; }
-    #clinic-detail-page .service-item .s-icon { width:32px; height:32px; display:flex; align-items:center; justify-content:center; color:#2a7ae4; }
-    #clinic-detail-page .service-item .s-icon img { width:28px; height:28px; object-fit:contain; }
+    #clinic-detail-page .service-item { display:grid; grid-template-columns: 140px 1fr auto; gap:14px; background:#f7faff; border:1px solid #dfe8f7; border-radius:14px; padding:16px; align-items:flex-start; }
+    #clinic-detail-page .service-item .s-icon { width:128px; height:128px; display:flex; align-items:center; justify-content:center; background:#fff; border-radius:16px; box-shadow:0 4px 14px rgba(42,122,228,0.12); overflow:hidden; }
+    #clinic-detail-page .service-item .s-icon img { width:100%; height:100%; object-fit:contain; }
     #clinic-detail-page .service-item .s-name { font-weight:600; }
     #clinic-detail-page .service-item .s-price { color:#2a7ae4; font-weight:700; }
-    #clinic-detail-page .service-item .s-desc { grid-column:1 / -1; color:#555; font-size:14px; margin-left:36px; }
-#clinic-detail-page .btn-book { background:#2a7ae4; color:#fff; border:none; padding:8px 12px; border-radius:8px; cursor:pointer; }
+    #clinic-detail-page .service-item .s-desc { grid-column: 2 / -1; color:#555; font-size:14px; margin-left:0; }
+    #clinic-detail-page .service-item .s-action { grid-column: 2 / -1; margin-top:6px; display:flex; align-items:center; }
+#clinic-detail-page .btn-book { background:#2a7ae4; color:#fff; border:none; padding:8px 12px; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; white-space:nowrap; }
+@media (max-width: 768px){
+  #clinic-detail-page .service-item { grid-template-columns: 96px 1fr; padding:12px; }
+  #clinic-detail-page .service-item .s-icon { width:96px; height:96px; }
+}
 
 /* Booking page */
 #booking-page .booking-layout { max-width:1100px; margin:16px auto; display:grid; grid-template-columns: 1.2fr 1fr; gap:16px; }

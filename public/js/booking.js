@@ -20,14 +20,14 @@
   }
 
   const petTypeLabels = {
-    dog: 'Chó',
-    cat: 'Mèo',
-    other: 'Khác'
+    dog: 'Ch\u00f3',
+    cat: 'M\u00e8o',
+    other: 'Kh\u00e1c'
   };
 
   function money(n){
-    try { return Number(n || 0).toLocaleString("vi-VN") + " ₫"; }
-    catch (err){ return (n || 0) + " ₫"; }
+    try { return Number(n || 0).toLocaleString("vi-VN") + " \u20ab"; }
+    catch (err){ return (n || 0) + " \u20ab"; }
   }
 
   function formatDate(iso){
@@ -41,19 +41,24 @@
     return {
       typeSelect: document.getElementById("pet-type"),
       nameInput: document.getElementById("pet-name"),
-      dateInput: document.getElementById("bk-date")
+      dateInput: document.getElementById("bk-date"),
+      ownerInput: document.getElementById("owner-name"),
+      colorInput: document.getElementById("pet-color"),
+      weightInput: document.getElementById("pet-weight"),
+      birthInput: document.getElementById("pet-birth"),
+      emailInput: document.getElementById("bk-email")
     };
   }
 
   function updateSummary(){
-    const { typeSelect, nameInput, dateInput } = getInputs();
-    if (dateInput && dateInput.value) state.date = dateInput.value;
+    const inputs = getInputs();
+    if (inputs.dateInput && inputs.dateInput.value) state.date = inputs.dateInput.value;
 
     const summaryCenter = document.getElementById("sum-center");
-    if (summaryCenter) summaryCenter.textContent = state.centerName || (state.centerId ? "Phòng khám #" + state.centerId : "Phòng khám");
+    if (summaryCenter) summaryCenter.textContent = state.centerName || (state.centerId ? "Ph\u00f2ng kh\u00e1m #" + state.centerId : "Ph\u00f2ng kh\u00e1m");
 
     const summaryService = document.getElementById("sum-service");
-    if (summaryService) summaryService.textContent = state.serviceName || (state.serviceId ? "Dịch vụ #" + state.serviceId : "Dịch vụ");
+    if (summaryService) summaryService.textContent = state.serviceName || (state.serviceId ? "D\u1ecbch v\u1ee5 #" + state.serviceId : "D\u1ecbch v\u1ee5");
 
     const summaryPrice = document.getElementById("sum-price");
     if (summaryPrice) summaryPrice.textContent = money(state.price);
@@ -65,20 +70,22 @@
     if (summaryTime) {
       summaryTime.textContent = (state.time && state.date)
         ? `${state.time}, ${formatDate(state.date)}`
-        : "Chưa chọn";
+        : "Ch\u01b0a ch\u1ecdn";
     }
 
-    updateButton(typeSelect, nameInput);
+    updateButton(inputs);
   }
 
-  function updateButton(typeSelect, nameInput){
+  function updateButton(inputs){
     const btn = document.getElementById("btn-confirm");
     if (!btn) return;
     const hasDate = Boolean(state.date);
     const hasTime = Boolean(state.time);
-    const hasType = Boolean(typeSelect && typeSelect.value);
-    const hasName = Boolean(nameInput && nameInput.value.trim());
-    btn.disabled = !(hasDate && hasTime && hasType && hasName);
+    const hasType = Boolean(inputs.typeSelect && inputs.typeSelect.value);
+    const hasName = Boolean(inputs.nameInput && inputs.nameInput.value.trim());
+    const ownerRequired = Boolean(inputs.ownerInput);
+    const hasOwner = !ownerRequired || Boolean(inputs.ownerInput.value.trim());
+    btn.disabled = !(hasDate && hasTime && hasType && hasName && hasOwner);
   }
 
   function renderTimeButtons(){
@@ -99,10 +106,9 @@
         btn.textContent = time;
         btn.addEventListener("click", function(){
           state.time = time;
-          const { typeSelect, nameInput } = getInputs();
           $all(".tg-btn").forEach(function(b){ b.classList.remove("active"); });
           btn.classList.add("active");
-          updateSummary(typeSelect, nameInput);
+          updateSummary();
         });
         grid.appendChild(btn);
       });
@@ -111,12 +117,18 @@
 
   async function submitBooking(event){
     if (event && typeof event.preventDefault === "function") event.preventDefault();
-    const { typeSelect, nameInput } = getInputs();
-    updateButton(typeSelect, nameInput);
-    if (!state.time || !state.date || !typeSelect || !typeSelect.value || !nameInput || !nameInput.value.trim()) {
+    const inputs = getInputs();
+    const { typeSelect, nameInput, ownerInput, colorInput, weightInput, birthInput, emailInput } = inputs;
+    updateButton(inputs);
+    const ownerRequired = Boolean(ownerInput);
+    const missingRequired = !state.time || !state.date ||
+      !typeSelect || !typeSelect.value ||
+      !nameInput || !nameInput.value.trim() ||
+      (ownerRequired && !ownerInput.value.trim());
+    if (missingRequired) {
       const messageBox = document.getElementById("bk-message");
       if (messageBox){
-        messageBox.textContent = "Vui lòng điền đầy đủ thông tin đặt lịch.";
+        messageBox.textContent = "Vui l\u00f2ng \u0111i\u1ec1n \u0111\u1ea7y \u0111\u1ee7 th\u00f4ng tin \u0111\u1eb7t l\u1ecbch.";
         messageBox.className = "bk-message error";
       }
       return;
@@ -126,6 +138,12 @@
     const confirmBtn = document.getElementById("btn-confirm");
     if (messageBox){ messageBox.textContent = ""; messageBox.className = "bk-message"; }
     if (confirmBtn) confirmBtn.disabled = true;
+
+    let weightValue = null;
+    if (weightInput && weightInput.value !== "") {
+      const parsedWeight = Number(weightInput.value);
+      weightValue = Number.isFinite(parsedWeight) ? parsedWeight : null;
+    }
 
     const payload = {
       center_id: state.centerId,
@@ -138,7 +156,11 @@
       pet_type: typeSelect.value,
       pet_type_label: petTypeLabels[typeSelect.value] || "",
       pet_name: nameInput.value.trim(),
-      email: document.getElementById("bk-email") ? document.getElementById("bk-email").value : ""
+      owner_name: ownerInput ? ownerInput.value.trim() : "",
+      color: colorInput ? colorInput.value.trim() : "",
+      weight_gram: weightValue,
+      birth_date: birthInput && birthInput.value ? birthInput.value : null,
+      email: emailInput ? emailInput.value : ""
     };
 
     try {
@@ -154,9 +176,9 @@
       } catch (parseErr) {
         throw new Error(raw);
       }
-      if (!res.ok) throw new Error(data && data.error ? data.error : "Đặt lịch thất bại");
+      if (!res.ok) throw new Error(data && data.error ? data.error : "\u0110\u1eb7t l\u1ecbch th\u1ea5t b\u1ea1i");
       if (messageBox){
-        messageBox.textContent = data.message || "Đặt lịch thành công";
+        messageBox.textContent = data.message || "\u0110\u1eb7t l\u1ecbch th\u00e0nh c\u00f4ng";
         messageBox.className = "bk-message success";
       }
       const timeLabel = (state.time && state.date) ? `${state.time}, ${formatDate(state.date)}` : (state.time || (state.date ? formatDate(state.date) : ""));
@@ -180,19 +202,24 @@
       }
     } catch (err){
       if (messageBox){
-        messageBox.textContent = err.message || "Có lỗi xảy ra khi đặt lịch";
+        messageBox.textContent = err.message || "C\u00f3 l\u1ed7i x\u1ea3y ra khi \u0111\u1eb7t l\u1ecbch";
         messageBox.className = "bk-message error";
       }
       if (confirmBtn) confirmBtn.disabled = false;
     } finally {
-      updateButton(typeSelect, nameInput);
+      updateButton(inputs);
     }
   }
 
   function bindInputs(){
-    const { typeSelect, nameInput, dateInput } = getInputs();
+    const inputs = getInputs();
+    const { typeSelect, nameInput, dateInput, ownerInput, colorInput, weightInput, birthInput } = inputs;
     if (typeSelect) typeSelect.addEventListener("change", updateSummary);
     if (nameInput) nameInput.addEventListener("input", updateSummary);
+    if (ownerInput) ownerInput.addEventListener("input", updateSummary);
+    if (colorInput) colorInput.addEventListener("input", updateSummary);
+    if (weightInput) weightInput.addEventListener("input", updateSummary);
+    if (birthInput) birthInput.addEventListener("change", updateSummary);
     if (dateInput){
       dateInput.addEventListener("change", function(){
         state.date = dateInput.value;

@@ -56,48 +56,90 @@ class Api_AppointmentsController {
     }
 
     private function insertLegacySchema(PDO $pdo, array $payload, string $date, string $time, string $petType, string $petName): int {
-        $clinicId = $this->requireClinic($pdo, (int)($payload['center_id'] ?? 0));
-        $serviceId = $this->resolveServiceId($pdo, $payload, $clinicId);
-        $animalTypeId = $this->resolveAnimalTypeId($pdo, $petType);
+    $clinicId = $this->requireClinic($pdo, (int)($payload['center_id'] ?? 0));
+    $serviceId = $this->resolveServiceId($pdo, $payload, $clinicId);
+    $animalTypeId = $this->resolveAnimalTypeId($pdo, $petType);
 
-        $stmt = $pdo->prepare('INSERT INTO appointments (animal_type_id, clinic_id, service_id, pet_name, appointment_date, appointment_time, price, status, created_at, updated_at)
-                               VALUES (:animal_type_id, :clinic_id, :service_id, :pet_name, :appointment_date, :appointment_time, :price, :status, NOW(), NOW())');
-        $stmt->execute([
-            ':animal_type_id' => $animalTypeId,
-            ':clinic_id' => $clinicId,
-            ':service_id' => $serviceId,
-            ':pet_name' => $petName,
-            ':appointment_date' => $date,
-            ':appointment_time' => $this->formatTimeForDb($time),
-            ':price' => isset($payload['price']) ? (float)$payload['price'] : 0,
-            ':status' => 'pending'
-        ]);
-        return (int)$pdo->lastInsertId();
+    $stmt = $pdo->prepare('INSERT INTO appointments (
+        animal_type_id, clinic_id, service_id,
+        pet_name, owner_name, color, weight_gram, birth_date,
+        appointment_date, appointment_time, price, status,
+        created_at, updated_at
+    ) VALUES (
+        :animal_type_id, :clinic_id, :service_id,
+        :pet_name, :owner_name, :color, :weight_gram, :birth_date,
+        :appointment_date, :appointment_time, :price, :status,
+        NOW(), NOW()
+    )');
+
+    $ok = $stmt->execute([
+        ':animal_type_id'   => $animalTypeId,
+        ':clinic_id'        => $clinicId,
+        ':service_id'       => $serviceId,
+        ':pet_name'         => $petName,
+        ':owner_name'       => $payload['owner_name'] ?? '',
+        ':color'            => $payload['color'] ?? '',
+        ':weight_gram'      => isset($payload['weight_gram']) ? (int)$payload['weight_gram'] : null,
+        ':birth_date'       => $payload['birth_date'] ?? null,
+        ':appointment_date' => $date,
+        ':appointment_time' => $this->formatTimeForDb($time),
+        ':price'            => isset($payload['price']) ? (float)$payload['price'] : 0,
+        ':status'           => $payload['status'] ?? 'pending'
+    ]);
+
+    if (!$ok) {
+        // Debug lỗi SQL
+        $error = $stmt->errorInfo();
+        throw new RuntimeException("Insert failed: " . implode(" | ", $error));
     }
+
+    return (int)$pdo->lastInsertId();
+}
+
+
+    
 
     private function insertExtendedSchema(PDO $pdo, array $payload, string $date, string $time, string $petType, string $petName): int {
-        $centerId = (int)($payload['center_id'] ?? 0) ?: null;
-        $serviceId = $this->resolveServiceId($pdo, $payload, $centerId);
+    $centerId = (int)($payload['center_id'] ?? 0) ?: null;
+    $serviceId = $this->resolveServiceId($pdo, $payload, $centerId);
 
-        $stmt = $pdo->prepare('INSERT INTO appointments (clinic_id, center_id, center_name, service_id, service_name, price, date, time, status, pet_type, pet_type_label, pet_name, email, created_at)
-                               VALUES (:clinic_id, :center_id, :center_name, :service_id, :service_name, :price, :date, :time, :status, :pet_type, :pet_type_label, :pet_name, :email, NOW())');
-        $stmt->execute([
-            ':clinic_id' => $centerId,
-            ':center_id' => $centerId,
-            ':center_name' => $payload['center_name'] ?? null,
-            ':service_id' => $serviceId,
-            ':service_name' => $payload['service_name'] ?? null,
-            ':price' => isset($payload['price']) ? (float)$payload['price'] : 0,
-            ':date' => $date,
-            ':time' => $time,
-            ':status' => 'pending',
-            ':pet_type' => $petType,
-            ':pet_type_label' => $payload['pet_type_label'] ?? null,
-            ':pet_name' => $petName,
-            ':email' => $payload['email'] ?? null,
-        ]);
-        return (int)$pdo->lastInsertId();
-    }
+    $stmt = $pdo->prepare('INSERT INTO appointments (
+            clinic_id, center_id, center_name, 
+            service_id, service_name, price, 
+            date, time, status, 
+            pet_type, pet_type_label, pet_name, 
+            owner_name, color, weight_gram, birth_date,
+            email, created_at
+        ) VALUES (
+            :clinic_id, :center_id, :center_name, 
+            :service_id, :service_name, :price, 
+            :date, :time, :status, 
+            :pet_type, :pet_type_label, :pet_name, 
+            :owner_name, :color, :weight_gram, :birth_date,
+            NOW()
+        )');
+
+    $stmt->execute([
+        ':clinic_id'      => $centerId,
+        ':center_id'      => $centerId,
+        ':center_name'    => $payload['center_name'] ?? null,
+        ':service_id'     => $serviceId,
+        ':service_name'   => $payload['service_name'] ?? null,
+        ':price'          => isset($payload['price']) ? (float)$payload['price'] : 0,
+        ':date'           => $date,
+        ':time'           => $time,
+        ':status'         => $payload['status'] ?? 'pending',
+        ':pet_type'       => $petType,
+        ':pet_type_label' => $payload['pet_type_label'] ?? null,
+        ':pet_name'       => $petName,
+        ':owner_name'     => $payload['owner_name'] ?? '',
+        ':color'          => $payload['color'] ?? '',
+        ':weight_gram'    => $payload['weight_gram'] ?? null,
+        ':birth_date'     => $payload['birth_date'] ?? null,
+    ]);
+
+    return (int)$pdo->lastInsertId();
+}
 
     private function ensureExtendedSchema(PDO $pdo, array $columns): void {
         $pdo->exec('CREATE TABLE IF NOT EXISTS appointments (

@@ -1,10 +1,27 @@
+<?php
+// Khởi tạo biến an toàn
+$pagination = $pagination ?? [];
+$service = $service ?? '';
+$q = $q ?? '';
+
+// Lấy keyword từ pagination (nếu có)
+$keyword = isset($pagination['keyword'])
+    ? htmlspecialchars($pagination['keyword'], ENT_QUOTES, 'UTF-8')
+    : '';
+
+// Escape các biến khác
+$service = htmlspecialchars($service, ENT_QUOTES, 'UTF-8');
+$q = htmlspecialchars($q, ENT_QUOTES, 'UTF-8');
+?>
+
 <?php $keyword = htmlspecialchars($pagination['keyword'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
-<div class="top-logo-bar index-hero"></div>
-<div class="home-search">
-  <form class="search-bar" action="index.php" method="get">
-    <input type="hidden" name="page" value="home">
-    <input type="text" name="q" placeholder="Tìm kiếm dịch vụ, phòng khám..." value="<?= $keyword ?>">
-    <button type="submit" title="Tìm kiếm"><i class="fas fa-search"></i></button>
+<header class="header">
+  <div class="logo"><img src="public/img/clinic-center.png" alt="Logo phòng khám" height="48"></div>
+  <form class="search-bar" data-search-form="1" method="get" action="index.php">
+    <input type="hidden" name="page" value="search">
+    <input type="hidden" name="service" value="<?= htmlspecialchars($service, ENT_QUOTES, 'UTF-8') ?>">
+    <input type="text" name="q" placeholder="Tìm kiếm dịch vụ, phòng khám..." value="<?= htmlspecialchars($q, ENT_QUOTES, 'UTF-8') ?>">
+    <button type="submit" title="Tìm"><i class="fas fa-search"></i></button>
   </form>
 </header>
 <script src="public/js/main.js?v=10"></script>

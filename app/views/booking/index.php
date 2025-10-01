@@ -25,17 +25,7 @@
 
   <section class="card booking-summary">
     <h2>Đặt lịch</h2>
-    <div class="summary-block">
-      <div class="s-label">Chọn loài thú</div>
-      <div class="s-value">
-        <select id="pet-type">
-          <option value="">-- Chọn loài --</option>
-          <option value="dog">Chó</option>
-          <option value="cat">Mèo</option>
-          <option value="other">Khác</option>
-        </select>
-      </div>
-    </div>
+   
     <div class="summary-block">
       <div class="s-label">Tên chủ sở hữu</div>
       <div class="s-value">
@@ -46,6 +36,17 @@
       <div class="s-label">Tên thú cưng</div>
       <div class="s-value">
         <input type="text" id="pet-name" placeholder="Nhập tên thú cưng">
+      </div>
+    </div>
+     <div class="summary-block">
+      <div class="s-label">Chọn loài thú</div>
+      <div class="s-value">
+        <select id="pet-type">
+          <option value="">-- Chọn loài --</option>
+          <option value="dog">Chó</option>
+          <option value="cat">Mèo</option>
+          <option value="other">Khác</option>
+        </select>
       </div>
     </div>
     <div class="summary-block">

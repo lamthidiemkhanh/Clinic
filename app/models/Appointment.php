@@ -25,6 +25,10 @@ class Appointment extends Model {
                        DATE_FORMAT(a.appointment_time, "%H:%i") AS time,
                        a.status,
                        a.pet_name,
+                       a.owner_name,
+                       a.color,
+                       a.weight_gram,
+                       a.birth_date,
                        a.price,
                        s.name AS service_name,
                        cc.name AS center_name
@@ -46,6 +50,11 @@ class Appointment extends Model {
                 'price' => $row['price'] ?? 0,
                 'center_name' => $row['center_name'] ?? '',
                 'pet_name' => $row['pet_name'] ?? '',
+                'owner_name' => $row['owner_name'] ?? '',
+                'color' => $row['color'] ?? '',
+                'weight_gram' => $row['weight_gram'] ?? '',
+                'birth_date' => $row['birth_date'] ?? '',
+
             ];
         }, $rows ?: []);
     }
@@ -54,7 +63,8 @@ class Appointment extends Model {
         $hasServiceTable = $this->tableExists('service');
         $hasClinicTable = $this->tableExists('clinic_center');
 
-        $columns = ['a.id', 'a.date', 'a.time', 'a.status', 'a.pet_name', 'a.pet_type', 'a.pet_type_label', 'a.email', 'a.price'];
+        $columns = ['a.id', 'a.date', 'a.time', 'a.status', 'a.pet_name', 'a.pet_type', 'a.pet_type_label',
+        'owner_name','color','weight_gram','birth_date',  'a.price'];
         if ($hasServiceTable) {
             $columns[] = 's.name AS service_name';
         } else {
@@ -109,7 +119,10 @@ class Appointment extends Model {
                 'pet_name' => $it['pet_name'] ?? '',
                 'pet_type' => $it['pet_type'] ?? '',
                 'pet_type_label' => $it['pet_type_label'] ?? '',
-                'email' => $it['email'] ?? ''
+                'owner_name' => $it['owner_name'] ?? '',
+                'color' => $it['color'] ?? '',
+                'weight_gram' => $it['weight_gram'] ?? '',
+                'birth_date' => $it['birth_date'] ?? ''
             ];
         }
         return $out;

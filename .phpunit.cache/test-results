@@ -1,1 +1,1 @@
-{"version":1,"defects":{"ApiClinicControllerTest::testIndexReturnsJson":8},"times":{"ApiClinicControllerTest::testIndexReturnsJson":0.022}}
+{"version":1,"defects":{"NotificationsControllerTest::testIndexWithNoNotifications":8,"NotificationsControllerTest::testIndexWithNotifications":8,"NotificationsControllerTest::testPayloadIsDecodedCorrectly":8},"times":[]}

@@ -1,6 +1,10 @@
-<?php
+﻿<?php
 class Database {
     private static ?PDO $pdo = null;
+
+    public static function setPdoInstance(?PDO $pdo): void {
+        self::$pdo = $pdo;
+    }
 
     public static function pdo(): PDO {
         if (self::$pdo instanceof PDO) return self::$pdo;

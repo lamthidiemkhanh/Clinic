@@ -9,21 +9,19 @@
  */
 namespace PHPUnit\Framework\MockObject;
 
-use function sprintf;
-
 /**
+ * @no-named-arguments Parameter names are not covered by the backward compatibility promise for PHPUnit
+ *
  * @internal This class is not covered by the backward compatibility promise for PHPUnit
+ *
+ * @codeCoverageIgnore
  */
-final class CannotUseAddMethodsException extends \PHPUnit\Framework\Exception implements Exception
+final class CannotCloneTestDoubleForReadonlyClassException extends \PHPUnit\Framework\Exception implements Exception
 {
-    public function __construct(string $type, string $methodName)
+    public function __construct()
     {
         parent::__construct(
-            sprintf(
-                'Trying to configure method "%s" with addMethods(), but it exists in class "%s". Use onlyMethods() for methods that exist in the class',
-                $methodName,
-                $type,
-            ),
+            'Cloning test doubles for readonly classes is not supported on PHP 8.2',
         );
     }
 }

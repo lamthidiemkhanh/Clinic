@@ -21,6 +21,8 @@ use PHPUnit\Framework\PhptAssertionFailedError;
 use Throwable;
 
 /**
+ * @no-named-arguments Parameter names are not covered by the backward compatibility promise for PHPUnit
+ *
  * @internal This class is not covered by the backward compatibility promise for PHPUnit
  */
 final readonly class Filter
@@ -73,6 +75,9 @@ final readonly class Filter
         return $filteredStacktrace;
     }
 
+    /**
+     * @param array{file?: non-empty-string} $frame
+     */
     private static function shouldPrintFrame(array $frame, false|string $prefix, ExcludeList $excludeList): bool
     {
         if (!isset($frame['file'])) {
@@ -86,13 +91,15 @@ final readonly class Filter
         if (isset($GLOBALS['_SERVER']['SCRIPT_NAME'])) {
             $script = realpath($GLOBALS['_SERVER']['SCRIPT_NAME']);
         } else {
+            // @codeCoverageIgnoreStart
             $script = '';
+            // @codeCoverageIgnoreEnd
         }
 
-        return is_file($file) &&
+        return $fileIsNotPrefixed &&
+               $file !== $script &&
                self::fileIsExcluded($file, $excludeList) &&
-               $fileIsNotPrefixed &&
-               $file !== $script;
+               is_file($file);
     }
 
     private static function fileIsExcluded(string $file, ExcludeList $excludeList): bool
@@ -102,6 +109,9 @@ final readonly class Filter
                 !$excludeList->isExcluded($file);
     }
 
+    /**
+     * @param list<array{file?: non-empty-string, line?: int}> $trace
+     */
     private static function frameExists(array $trace, string $file, int $line): bool
     {
         foreach ($trace as $frame) {

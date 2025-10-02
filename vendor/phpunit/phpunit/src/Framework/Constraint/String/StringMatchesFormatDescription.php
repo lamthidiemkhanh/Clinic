@@ -10,6 +10,7 @@
 namespace PHPUnit\Framework\Constraint;
 
 use const DIRECTORY_SEPARATOR;
+use const PHP_EOL;
 use function explode;
 use function implode;
 use function preg_match;
@@ -22,9 +23,9 @@ use SebastianBergmann\Diff\Output\UnifiedDiffOutputBuilder;
 /**
  * @no-named-arguments Parameter names are not covered by the backward compatibility promise for PHPUnit
  */
-final readonly class StringMatchesFormatDescription extends Constraint
+final class StringMatchesFormatDescription extends Constraint
 {
-    private string $formatDescription;
+    private readonly string $formatDescription;
 
     public function __construct(string $formatDescription)
     {

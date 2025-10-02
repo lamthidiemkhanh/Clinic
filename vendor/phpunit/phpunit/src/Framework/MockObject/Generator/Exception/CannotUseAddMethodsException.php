@@ -12,16 +12,19 @@ namespace PHPUnit\Framework\MockObject\Generator;
 use function sprintf;
 
 /**
+ * @no-named-arguments Parameter names are not covered by the backward compatibility promise for PHPUnit
+ *
  * @internal This class is not covered by the backward compatibility promise for PHPUnit
  */
-final class ClassIsReadonlyException extends \PHPUnit\Framework\Exception implements Exception
+final class CannotUseAddMethodsException extends \PHPUnit\Framework\Exception implements Exception
 {
-    public function __construct(string $className)
+    public function __construct(string $type, string $methodName)
     {
         parent::__construct(
             sprintf(
-                'Class "%s" is declared "readonly" and cannot be doubled',
-                $className,
+                'Trying to configure method "%s" with addMethods(), but it exists in class "%s". Use onlyMethods() for methods that exist in the class',
+                $methodName,
+                $type,
             ),
         );
     }

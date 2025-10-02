@@ -15,13 +15,13 @@ use function strtolower;
 use Countable;
 use PHPUnit\Framework\ExpectationFailedException;
 use PHPUnit\Framework\SelfDescribing;
+use PHPUnit\Util\Exporter;
 use SebastianBergmann\Comparator\ComparisonFailure;
-use SebastianBergmann\Exporter\Exporter;
 
 /**
  * @no-named-arguments Parameter names are not covered by the backward compatibility promise for PHPUnit
  */
-abstract readonly class Constraint implements Countable, SelfDescribing
+abstract class Constraint implements Countable, SelfDescribing
 {
     /**
      * Evaluates the constraint for parameter $other.
@@ -78,7 +78,7 @@ abstract readonly class Constraint implements Countable, SelfDescribing
      *
      * @throws ExpectationFailedException
      */
-    protected function fail(mixed $other, string $description, ComparisonFailure $comparisonFailure = null): never
+    protected function fail(mixed $other, string $description, ?ComparisonFailure $comparisonFailure = null): never
     {
         $failureDescription = sprintf(
             'Failed asserting that %s.',
@@ -123,7 +123,7 @@ abstract readonly class Constraint implements Countable, SelfDescribing
      */
     protected function failureDescription(mixed $other): string
     {
-        return (new Exporter)->export($other) . ' ' . $this->toString();
+        return Exporter::export($other) . ' ' . $this->toString();
     }
 
     /**
@@ -163,7 +163,7 @@ abstract readonly class Constraint implements Countable, SelfDescribing
             return '';
         }
 
-        return (new Exporter)->export($other) . ' ' . $string;
+        return Exporter::export($other) . ' ' . $string;
     }
 
     /**
@@ -232,7 +232,7 @@ abstract readonly class Constraint implements Countable, SelfDescribing
     }
 
     /**
-     * @psalm-return non-empty-string
+     * @return non-empty-string
      */
     protected function valueToTypeStringFragment(mixed $value): string
     {
